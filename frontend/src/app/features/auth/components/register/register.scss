@@ -1,0 +1,40 @@
+.register-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 80px;
+}
+
+/* Szerokość karty */
+.register-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+/* Pola na całą szerokość */
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.register-btn {
+  padding: 24px 0;
+  font-size: 16px;
+  margin-bottom: 8px; 
+}
+
+/* Wyśrodkowanie tytułu */
+mat-card-header {
+  margin-bottom: 24px;
+  justify-content: center;
+}
+
+/* Układ stopki z pytaniem i przyciskiem logowania */
+.card-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center; /* Zrównuje tekst z przyciskiem w jednej linii */
+  gap: 8px; /* Odstęp między tekstem a przyciskiem */
+  margin-top: 8px;
+}
