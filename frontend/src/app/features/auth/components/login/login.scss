@@ -1,0 +1,31 @@
+.login-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 80px; /* Odstęp od górnego paska */
+}
+
+/* Szerokość samego białego kafelka */
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  border-radius: 12px; /* Lekko zaokrąglone rogi */
+}
+
+/* Pola tekstowe i przycisk mają zajmować całą szerokość kafelka */
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+/* Dodatkowy odstęp dla przycisku, żeby nie leżał na polach */
+.login-btn {
+  padding: 24px 0;
+  font-size: 16px;
+}
+
+/* Odsuwamy tytuł od krawędzi kafelka */
+mat-card-header {
+  margin-bottom: 24px;
+  justify-content: center;
+}

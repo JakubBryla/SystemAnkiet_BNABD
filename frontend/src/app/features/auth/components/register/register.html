@@ -1,0 +1,37 @@
+<div class="register-wrapper">
+  <mat-card class="register-card">
+    
+    <mat-card-header>
+      <mat-card-title>Rejestracja nowego konta</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Adres e-mail</mat-label>
+          <input matInput type="email" placeholder="jan@kowalski.pl">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Hasło</mat-label>
+          <input matInput type="password" placeholder="Wpisz hasło">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Powtórz hasło</mat-label>
+          <input matInput type="password" placeholder="Potwierdź hasło">
+        </mat-form-field>
+
+        <button mat-flat-button color="accent" class="full-width register-btn">
+          Zarejestruj się
+        </button>
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions class="card-footer">
+      <span>Masz już konto?</span>
+      <button mat-button color="primary" routerLink="/login">Zaloguj się</button>
+    </mat-card-actions>
+
+  </mat-card>
+</div>
