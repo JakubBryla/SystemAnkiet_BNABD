@@ -80,3 +80,12 @@ h2 {
 .option-input {
   flex: 1; 
 }
+
+.question-settings {
+  width: 100%;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--mat-sys-outline-variant); /* Cienka linia oddzielająca */
+  display: flex;
+  justify-content: flex-end; /* Wyrównanie do prawej */
+}

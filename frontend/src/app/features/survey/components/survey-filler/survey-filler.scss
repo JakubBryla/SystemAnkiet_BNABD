@@ -1,0 +1,72 @@
+.filler-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 0 16px;
+}
+
+.message-card {
+  text-align: center;
+  padding: 32px 16px;
+  margin-top: 40px;
+  background-color: var(--mat-sys-surface);
+}
+
+.survey-header {
+  background-color: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+  margin-bottom: 24px;
+  
+  h1 {
+    margin: 0 0 8px 0;
+    font-size: 28px;
+  }
+  
+  .description {
+    margin: 0;
+    font-size: 16px;
+    opacity: 0.9;
+  }
+}
+
+.question-card {
+  margin-bottom: 24px;
+}
+
+.question-text {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.submit-action {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+  padding-bottom: 64px;
+  
+  .submit-btn {
+    font-size: 16px;
+    padding: 24px 48px;
+  }
+}
+
+.required-asterisk {
+  color: var(--mat-sys-error); 
+  margin-left: 4px;
+}
+
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
