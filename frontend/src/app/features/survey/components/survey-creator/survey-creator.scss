@@ -16,7 +16,7 @@ h2 {
 
 .survey-header-card, .question-card {
   margin-bottom: 24px;
-  background-color: #ffffff;
+  background-color: var(--mat-sys-surface);
 }
 
 .question-header {
@@ -55,7 +55,7 @@ h2 {
   width: 100%;
   margin-top: 16px;
   padding: 16px;
-  background-color: #f8f9fa; 
+  background-color: var(--mat-sys-surface-variant); 
   border-radius: 8px;
 }
 
@@ -63,7 +63,7 @@ h2 {
   margin-top: 0;
   margin-bottom: 12px;
   font-weight: 500;
-  color: #555;
+  color: var(--mat-sys-on-surface-variant);
 }
 
 .option-row {
@@ -74,11 +74,9 @@ h2 {
 }
 
 .option-icon {
-  color: #9e9e9e; 
+  color: var(--mat-sys-outline); 
 }
 
 .option-input {
   flex: 1; 
-  /* Zmniejszamy dolny margines, bo pola wewnątrz opcji są bliżej siebie */
-  margin-bottom: -16px; 
 }

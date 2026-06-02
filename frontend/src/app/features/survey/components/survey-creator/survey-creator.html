@@ -55,7 +55,7 @@
                       {{ question.get('type')?.value === 'single-choice' ? 'radio_button_unchecked' : 'check_box_outline_blank' }}
                     </mat-icon>
                     
-                    <mat-form-field appearance="outline" class="option-input">
+                    <mat-form-field appearance="outline" class="option-input" subscriptSizing="dynamic">
                       <input matInput [formControlName]="optIndex" placeholder="np. Opcja {{ optIndex + 1 }}">
                     </mat-form-field>
                     
