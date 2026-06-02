@@ -3,9 +3,19 @@ package com.systemankiet.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(exclude = {"password", "confirmPassword"})
+@EqualsAndHashCode(exclude = {"password", "confirmPassword"})
 public class RegisterRequest {
 
     @NotBlank(message = "Email jest wymagany")

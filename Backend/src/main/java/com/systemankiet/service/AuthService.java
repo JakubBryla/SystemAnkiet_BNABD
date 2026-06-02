@@ -27,7 +27,7 @@ public class AuthService {
             new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
 
-        User user = userRepository.findByEmail(request.getEmail())
+        User user = userRepository.findByEmailIgnoreCase(request.getEmail())
             .orElseThrow(() -> new RuntimeException("Uzytkownik nie znaleziony"));
 
         String token = jwtUtil.generateToken(user.getEmail());
@@ -39,7 +39,7 @@ public class AuthService {
             throw new IllegalArgumentException("Hasla nie sa takie same");
         }
 
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (userRepository.existsByEmailIgnoreCase(request.getEmail())) {
             throw new IllegalArgumentException("Email jest juz zajety");
         }
 

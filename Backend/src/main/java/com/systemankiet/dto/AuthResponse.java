@@ -1,10 +1,14 @@
 package com.systemankiet.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
-@Data
+@Getter
 @AllArgsConstructor
+@ToString(exclude = "token")
+@EqualsAndHashCode(exclude = "token")
 public class AuthResponse {
 
     private String token;

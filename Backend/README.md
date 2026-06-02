@@ -109,7 +109,11 @@ spring.datasource.password=TwojNowHaslo123!
 
 **Jesli uzywasz SQL Server Express**, URL moze byc:
 ```properties
-spring.datasource.url=jdbc:sqlserver://localhost\SQLEXPRESS:1433;databaseName=SystemAnkiet;encrypt=true;trustServerCertificate=true
+# Opcja 1: Uzyj nazwanej instancji (bez portu)
+spring.datasource.url=jdbc:sqlserver://localhost\SQLEXPRESS;databaseName=SystemAnkiet;encrypt=true;trustServerCertificate=true
+
+# Opcja 2: Uzyj host:port bez instancji (jesli znasz port TCP)
+spring.datasource.url=jdbc:sqlserver://localhost:1433;databaseName=SystemAnkiet;encrypt=true;trustServerCertificate=true
 ```
 
 **Hibernate automatycznie utworzy tabele** przy pierwszym uruchomieniu (`ddl-auto=update`).

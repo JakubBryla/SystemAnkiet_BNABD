@@ -41,6 +41,7 @@ public class SurveyService {
 
         if (request.getQuestions() != null) {
             for (QuestionDto qDto : request.getQuestions()) {
+                if (qDto == null) continue;
                 Question question = new Question();
                 question.setQuestionText(qDto.getText().trim());
                 question.setQuestionType(qDto.getType().trim());
