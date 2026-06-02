@@ -6,23 +6,34 @@
     </mat-card-header>
 
     <mat-card-content>
-      <form>
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Adres e-mail</mat-label>
-          <input matInput type="email" placeholder="jan@kowalski.pl">
+          <input matInput type="email" formControlName="email" placeholder="jan@kowalski.pl">
+          @if (registerForm.get('email')?.hasError('email')) {
+            <mat-error>Niepoprawny format adresu e-mail</mat-error>
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Hasło</mat-label>
-          <input matInput type="password" placeholder="Wpisz hasło">
+          <mat-label>Hasło (min. 8 znaków)</mat-label>
+          <input matInput type="password" formControlName="password" placeholder="Wpisz hasło">
+          @if (registerForm.get('password')?.hasError('minlength')) {
+            <mat-error>Hasło musi mieć minimum 8 znaków</mat-error>
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Powtórz hasło</mat-label>
-          <input matInput type="password" placeholder="Potwierdź hasło">
+          <input matInput type="password" formControlName="confirmPassword" placeholder="Potwierdź hasło">
         </mat-form-field>
 
-        <button mat-flat-button color="accent" class="full-width register-btn">
+        @if (registerForm.hasError('passwordsMismatch') && registerForm.get('confirmPassword')?.touched) {
+          <div class="custom-error-message">Hasła nie są identyczne!</div>
+        }
+
+        <button mat-flat-button color="accent" class="full-width register-btn" type="submit" [disabled]="registerForm.invalid">
           Zarejestruj się
         </button>
       </form>

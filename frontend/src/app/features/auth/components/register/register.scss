@@ -38,3 +38,12 @@ mat-card-header {
   gap: 8px; /* Odstęp między tekstem a przyciskiem */
   margin-top: 8px;
 }
+
+/* Styl dla komunikatu o niezgodnych hasłach */
+.custom-error-message {
+  color: #f44336; 
+  font-size: 12px;
+  margin-top: -8px;
+  margin-bottom: 16px;
+  padding-left: 16px;
+}

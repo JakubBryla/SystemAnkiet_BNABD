@@ -6,20 +6,22 @@
     </mat-card-header>
 
     <mat-card-content>
-      <form>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Adres e-mail</mat-label>
-          <input matInput type="email" placeholder="jan@kowalski.pl">
+          <input matInput type="email" formControlName="email" placeholder="jan@kowalski.pl">
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Hasło</mat-label>
-          <input matInput type="password" placeholder="Wpisz hasło">
+          <input matInput type="password" formControlName="password" placeholder="Wpisz hasło">
         </mat-form-field>
 
-        <button mat-flat-button color="primary" class="full-width login-btn">
+        <button mat-flat-button color="primary" class="full-width login-btn" type="submit" [disabled]="loginForm.invalid">
           Zaloguj się
         </button>
+
       </form>
     </mat-card-content>
 
