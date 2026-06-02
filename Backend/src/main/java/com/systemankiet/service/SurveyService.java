@@ -72,7 +72,7 @@ public class SurveyService {
 
     @Transactional(readOnly = true)
     public SurveyDetailDto getPublicSurvey(Long id) {
-        Survey survey = surveyRepository.findById(id)
+        Survey survey = surveyRepository.findByIdAndStatus(id, SurveyStatus.ACTIVE)
                 .orElseThrow(() -> new NoSuchElementException("Ankieta nie znaleziona"));
         return SurveyDetailDto.fromEntity(survey);
     }
