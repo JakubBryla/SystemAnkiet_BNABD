@@ -1,0 +1,44 @@
+/* Nagłówek rozsuwa tytuł na lewo, a przycisk na prawo */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  
+  h2 {
+    margin: 0;
+    color: var(--mat-sys-on-surface);
+  }
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px; 
+}
+
+/* Pojedynczy kafelek */
+.survey-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Wypycha przyciski na sam dół */
+  height: 100%; 
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+  }
+}
+
+.responses-count {
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+/* Wyrównanie przycisków wewnątrz kafelka */
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 16px;
+}
