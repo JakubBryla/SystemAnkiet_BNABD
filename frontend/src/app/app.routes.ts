@@ -3,6 +3,7 @@ import { Login } from './features/auth/components/login/login';
 import { Register } from './features/auth/components/register/register';
 import { Dashboard } from './features/dashboard/components/dashboard/dashboard';
 
+import { SurveyCreator } from './features/survey/components/survey-creator/survey-creator';
 import { authGuard } from './features/auth/guards/auth-guard';
 
 export const routes: Routes = [
@@ -13,6 +14,11 @@ export const routes: Routes = [
   { 
     path: 'dashboard', 
     component: Dashboard,
+    canActivate: [authGuard] 
+  },
+  { 
+    path: 'survey/:id/edit', 
+    component: SurveyCreator,
     canActivate: [authGuard] 
   }
   

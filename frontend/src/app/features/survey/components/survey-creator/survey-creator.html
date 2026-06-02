@@ -1,0 +1,92 @@
+<div class="creator-container">
+  <h2>Kreator Ankiety</h2>
+
+  <form [formGroup]="surveyForm" (ngSubmit)="saveSurvey()">
+    
+    <mat-card class="survey-header-card">
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Tytuł ankiety</mat-label>
+          <input matInput formControlName="title" placeholder="np. Badanie zadowolenia">
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Opis ankiety (opcjonalny)</mat-label>
+          <textarea matInput formControlName="description" rows="2"></textarea>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
+    <div formArrayName="questions">
+      
+      @for (question of questions.controls; track qIndex; let qIndex = $index) {
+        
+        <mat-card class="question-card" [formGroupName]="qIndex">
+          <mat-card-header class="question-header">
+            <mat-card-title>Pytanie {{ qIndex + 1 }}</mat-card-title>
+            <button mat-icon-button color="warn" type="button" (click)="removeQuestion(qIndex)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </mat-card-header>
+          
+          <mat-card-content class="question-content">
+            <mat-form-field appearance="outline" class="question-input">
+              <mat-label>Treść pytania</mat-label>
+              <input matInput formControlName="text" placeholder="np. Jak oceniasz nasze usługi?">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="type-select">
+              <mat-label>Typ pytania</mat-label>
+              <mat-select formControlName="type">
+                <mat-option value="short-answer">Krótka odpowiedź</mat-option>
+                <mat-option value="single-choice">Jednokrotny wybór</mat-option>
+                <mat-option value="multiple-choice">Wielokrotny wybór</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            @if (question.get('type')?.value === 'single-choice' || question.get('type')?.value === 'multiple-choice') {
+              
+              <div formArrayName="options" class="options-container">
+                <p class="options-title">Warianty odpowiedzi:</p>
+                
+                @for (option of getOptions(qIndex).controls; track optIndex; let optIndex = $index) {
+                  <div class="option-row">
+                    <mat-icon class="option-icon">
+                      {{ question.get('type')?.value === 'single-choice' ? 'radio_button_unchecked' : 'check_box_outline_blank' }}
+                    </mat-icon>
+                    
+                    <mat-form-field appearance="outline" class="option-input" subscriptSizing="dynamic">
+                      <input matInput [formControlName]="optIndex" placeholder="np. Opcja {{ optIndex + 1 }}">
+                    </mat-form-field>
+                    
+                    <button mat-icon-button color="warn" type="button" (click)="removeOption(qIndex, optIndex)">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                }
+
+                <button mat-button color="accent" type="button" (click)="addOption(qIndex)">
+                  <mat-icon>add</mat-icon> Dodaj opcję
+                </button>
+              </div>
+
+            }
+
+          </mat-card-content>
+        </mat-card>
+
+      }
+    </div>
+
+    <div class="actions">
+      <button mat-flat-button color="accent" type="button" (click)="addQuestion()">
+        <mat-icon>add</mat-icon> Dodaj kolejne pytanie
+      </button>
+      
+      <button mat-flat-button color="primary" type="submit" [disabled]="surveyForm.invalid">
+        Zapisz ankietę
+      </button>
+    </div>
+
+  </form>
+</div>
