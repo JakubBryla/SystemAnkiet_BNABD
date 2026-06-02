@@ -28,7 +28,7 @@ public class Question {
     @Column(name = "question_type", nullable = false)
     private String questionType;
 
-    @Column(name = "is_required", nullable = false)
+    @Column(name = "is_required", nullable = false, columnDefinition = "BIT DEFAULT 0")
     private boolean required;
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
