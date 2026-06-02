@@ -1,7 +1,11 @@
 package com.systemankiet.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class CreateSurveyRequest {
@@ -10,4 +14,7 @@ public class CreateSurveyRequest {
     private String title;
 
     private String description;
+
+    @Valid
+    private List<QuestionDto> questions = new ArrayList<>();
 }

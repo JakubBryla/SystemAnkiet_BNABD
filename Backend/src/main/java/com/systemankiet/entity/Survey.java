@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "surveys")
@@ -37,6 +39,10 @@ public class Survey {
 
     @Column(name = "responses_count")
     private int responsesCount;
+
+    @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderColumn(name = "question_order")
+    private List<Question> questions = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
