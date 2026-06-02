@@ -11,17 +11,17 @@ import java.util.stream.Collectors;
 @Data
 public class QuestionDto {
 
-    // Pola wejsciowe (przyjmowane z frontendu)
-    // Nazwy pol odpowiadaja kluczom JSON: "text", "type", "options"
     @NotBlank(message = "Tresc pytania nie moze byc pusta")
     private String text;
 
     @NotBlank(message = "Typ pytania jest wymagany")
     private String type;
 
+    // Boolean (nie boolean) - Lombok generuje getIsRequired(), Jackson mapuje na klucz "isRequired"
+    private Boolean isRequired;
+
     private List<String> options = new ArrayList<>();
 
-    // Pole wyjsciowe (zwracane do frontendu po zapisie)
     private Long id;
 
     public static QuestionDto fromEntity(Question question) {
@@ -29,6 +29,7 @@ public class QuestionDto {
         dto.setId(question.getId());
         dto.setText(question.getQuestionText());
         dto.setType(question.getQuestionType());
+        dto.setIsRequired(question.isRequired());
         dto.setOptions(
             question.getOptions().stream()
                 .map(opt -> opt.getOptionText())

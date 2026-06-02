@@ -1,7 +1,9 @@
 package com.systemankiet.controller;
 
 import com.systemankiet.dto.CreateSurveyRequest;
+import com.systemankiet.dto.SurveyDetailDto;
 import com.systemankiet.dto.SurveyDto;
+import com.systemankiet.dto.UpdateSurveyStatusRequest;
 import com.systemankiet.entity.User;
 import com.systemankiet.service.SurveyService;
 import jakarta.validation.Valid;
@@ -20,11 +22,19 @@ public class SurveyController {
 
     private final SurveyService surveyService;
 
+    // Pobiera liste ankiet zalogowanego uzytkownika
     @GetMapping
     public ResponseEntity<List<SurveyDto>> getUserSurveys(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(surveyService.getUserSurveys(user));
     }
 
+    // Publiczny endpoint - zwraca pelna ankiete z pytaniami (dla SurveyFiller, bez logowania)
+    @GetMapping("/{id}/public")
+    public ResponseEntity<SurveyDetailDto> getPublicSurvey(@PathVariable Long id) {
+        return ResponseEntity.ok(surveyService.getPublicSurvey(id));
+    }
+
+    // Tworzy nowa ankiete z pytaniami i opcjami (kaskadowo)
     @PostMapping
     public ResponseEntity<SurveyDto> createSurvey(
             @Valid @RequestBody CreateSurveyRequest request,
@@ -33,6 +43,25 @@ public class SurveyController {
                 .body(surveyService.createSurvey(request, user));
     }
 
+    // Aktualizuje tresc ankiety i pytania (uzywane przez kreator)
+    @PutMapping("/{id}")
+    public ResponseEntity<SurveyDto> updateSurvey(
+            @PathVariable Long id,
+            @Valid @RequestBody CreateSurveyRequest request,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(surveyService.updateSurvey(id, request, user));
+    }
+
+    // Zmienia status ankiety (draft/active/closed)
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<SurveyDto> updateSurveyStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateSurveyStatusRequest request,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(surveyService.updateSurveyStatus(id, request, user));
+    }
+
+    // Usuwa ankiete (tylko wlasna)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSurvey(
             @PathVariable Long id,

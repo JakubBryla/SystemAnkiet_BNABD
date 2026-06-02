@@ -97,23 +97,31 @@ ALTER LOGIN sa ENABLE;
 ALTER LOGIN sa WITH PASSWORD = 'TwojNowHaslo123!';
 ```
 
-### Krok 4 - Aktualizacja application.properties
+### Krok 4 - Konfiguracja zmiennych srodowiskowych
 
-Otworz plik `src/main/resources/application.properties` i zmien:
+Aplikacja wymaga ustawienia zmiennych srodowiskowych dla polaczenia z baza danych:
 
-```properties
-spring.datasource.url=jdbc:sqlserver://localhost:1433;databaseName=SystemAnkiet;encrypt=true;trustServerCertificate=true
-spring.datasource.username=sa
-spring.datasource.password=TwojNowHaslo123!
+**Wymagane zmienne srodowiskowe:**
+```bash
+DB_URL=jdbc:sqlserver://localhost:1433;databaseName=SystemAnkiet;encrypt=true;trustServerCertificate=true
+DB_USERNAME=sa
+DB_PASSWORD=TwojNowHaslo123!
+JWT_SECRET=TwojSekretnyKluczJWT_Min32Znaki!!!
 ```
 
+**Dla developmentu lokalnego** mozesz uzyc profilu `local` z przygotowanymi wartosciami domyslnymi:
+
+1. Skopiuj plik `src/main/resources/application-local.properties.example` na `application-local.properties` (plik jest w `.gitignore`)
+2. Dostosuj ustawienia do swojej lokalnej konfiguracji
+3. Uruchom aplikacje z profilem local: `mvnw spring-boot:run -Dspring-boot.run.profiles=local`
+
 **Jesli uzywasz SQL Server Express**, URL moze byc:
-```properties
+```bash
 # Opcja 1: Uzyj nazwanej instancji (bez portu)
-spring.datasource.url=jdbc:sqlserver://localhost\SQLEXPRESS;databaseName=SystemAnkiet;encrypt=true;trustServerCertificate=true
+DB_URL=jdbc:sqlserver://localhost\SQLEXPRESS;databaseName=SystemAnkiet;encrypt=true;trustServerCertificate=true
 
 # Opcja 2: Uzyj host:port bez instancji (jesli znasz port TCP)
-spring.datasource.url=jdbc:sqlserver://localhost:1433;databaseName=SystemAnkiet;encrypt=true;trustServerCertificate=true
+DB_URL=jdbc:sqlserver://localhost:1433;databaseName=SystemAnkiet;encrypt=true;trustServerCertificate=true
 ```
 
 **Hibernate automatycznie utworzy tabele** przy pierwszym uruchomieniu (`ddl-auto=update`).

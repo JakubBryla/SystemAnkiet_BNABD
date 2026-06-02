@@ -1,5 +1,7 @@
 package com.systemankiet.exception;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -14,6 +16,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -50,9 +53,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 
+    // Bledy naruszenia ograniczen bazy danych (NOT NULL, UNIQUE, FK)
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, String>> handleDataIntegrity(DataIntegrityViolationException ex) {
+        log.error("Naruszenie integralnosci bazy danych: {}", ex.getMessage(), ex);
+        String msg = ex.getMostSpecificCause().getMessage();
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("error", "Blad bazy danych: " + msg));
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, String>> handleRuntime(RuntimeException ex) {
+        log.error("Nieobslugiwany blad: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Blad serwera: " + ex.getMessage()));
+                .body(Map.of("error", "Blad serwera: " + Optional.ofNullable(ex.getMessage()).orElse("nieznany blad")));
     }
 }

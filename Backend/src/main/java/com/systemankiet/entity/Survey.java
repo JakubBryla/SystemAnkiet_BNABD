@@ -12,9 +12,7 @@ import java.util.List;
 @Table(name = "surveys")
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
 public class Survey {
 
     @Id
@@ -37,9 +35,6 @@ public class Survey {
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
-    @Column(name = "responses_count")
-    private int responsesCount;
-
     @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderColumn(name = "question_order")
     private List<Question> questions = new ArrayList<>();
@@ -48,7 +43,7 @@ public class Survey {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         if (status == null) {
-            status = SurveyStatus.SZKIC;
+            status = SurveyStatus.DRAFT;
         }
     }
 }
