@@ -12,9 +12,7 @@ import java.util.List;
 @Table(name = "surveys")
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
 public class Survey {
 
     @Id
@@ -36,9 +34,6 @@ public class Survey {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
-
-    @Column(name = "responses_count")
-    private int responsesCount;
 
     @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderColumn(name = "question_order")
