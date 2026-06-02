@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,6 +8,14 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCheckboxModule, MatCheckboxChange } from '@angular/material/checkbox';
+
+export function trimRequiredValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const isWhitespace = (control.value || '').trim().length === 0;
+    
+    return isWhitespace ? { required: true } : null;
+  };
+}
 
 export interface Question {
   id: number;
@@ -77,11 +85,21 @@ export class SurveyFiller implements OnInit {
     this.answersForm = this.fb.group({});
 
     this.survey?.questions.forEach(question => {
-      const validators = question.isRequired ? [Validators.required] : [];
+      const validators: ValidatorFn[] = [];
+
+      if (question.isRequired) {
+        if (question.type === 'short-answer') {
+          validators.push(trimRequiredValidator());
+        } else {
+          validators.push(Validators.required);
+        }
+      }
+      
       const initialValue = question.type === 'multiple-choice' ? [] : '';
+      
       this.answersForm.addControl(
         question.id.toString(), 
-        this.fb.control(initialValue, validators)
+        this.fb.control(initialValue, validators) 
       );
     });
   }
