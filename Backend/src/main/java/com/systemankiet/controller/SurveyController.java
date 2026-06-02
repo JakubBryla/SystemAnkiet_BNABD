@@ -43,6 +43,15 @@ public class SurveyController {
                 .body(surveyService.createSurvey(request, user));
     }
 
+    // Aktualizuje tresc ankiety i pytania (uzywane przez kreator)
+    @PutMapping("/{id}")
+    public ResponseEntity<SurveyDto> updateSurvey(
+            @PathVariable Long id,
+            @Valid @RequestBody CreateSurveyRequest request,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(surveyService.updateSurvey(id, request, user));
+    }
+
     // Zmienia status ankiety (draft/active/closed)
     @PatchMapping("/{id}/status")
     public ResponseEntity<SurveyDto> updateSurveyStatus(

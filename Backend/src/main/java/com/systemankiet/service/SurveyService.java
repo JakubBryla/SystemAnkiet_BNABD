@@ -71,6 +71,45 @@ public class SurveyService {
     }
 
     @Transactional
+    public SurveyDto updateSurvey(Long id, CreateSurveyRequest request, User user) {
+        Survey survey = surveyRepository.findByIdAndCreatedBy(id, user)
+                .orElseThrow(() -> new NoSuchElementException("Ankieta nie znaleziona lub brak uprawnien"));
+
+        survey.setTitle(request.getTitle().trim());
+        survey.setDescription(request.getDescription());
+
+        // Usuniecie starych pytan (orphanRemoval = true usuwa je z bazy)
+        survey.getQuestions().clear();
+
+        if (request.getQuestions() != null) {
+            for (QuestionDto qDto : request.getQuestions()) {
+                if (qDto == null) continue;
+
+                Question question = new Question();
+                question.setQuestionText(qDto.getText().trim());
+                question.setQuestionType(qDto.getType().trim());
+                question.setRequired(qDto.isRequired());
+                question.setSurvey(survey);
+                question.setOptions(new ArrayList<>());
+
+                if (qDto.getOptions() != null) {
+                    for (String optText : qDto.getOptions()) {
+                        if (optText == null || optText.isBlank()) continue;
+                        AnswerOption option = new AnswerOption();
+                        option.setOptionText(optText.trim());
+                        option.setQuestion(question);
+                        question.getOptions().add(option);
+                    }
+                }
+
+                survey.getQuestions().add(question);
+            }
+        }
+
+        return SurveyDto.fromEntity(surveyRepository.save(survey));
+    }
+
+    @Transactional
     public SurveyDto updateSurveyStatus(Long id, UpdateSurveyStatusRequest request, User user) {
         Survey survey = surveyRepository.findByIdAndCreatedBy(id, user)
                 .orElseThrow(() -> new NoSuchElementException("Ankieta nie znaleziona lub brak uprawnien"));
