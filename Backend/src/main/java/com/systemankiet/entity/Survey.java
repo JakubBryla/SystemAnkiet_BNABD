@@ -48,7 +48,7 @@ public class Survey {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         if (status == null) {
-            status = SurveyStatus.SZKIC;
+            status = SurveyStatus.DRAFT;
         }
     }
 }
