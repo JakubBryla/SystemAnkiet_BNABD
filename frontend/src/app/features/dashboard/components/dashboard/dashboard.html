@@ -1,0 +1,33 @@
+<div class="dashboard-wrapper">
+  <div class="dashboard-header">
+    <h2>Twoje Ankiety</h2>
+    <button mat-flat-button color="primary" (click)="openCreateSurveyDialog()">
+      <mat-icon>add</mat-icon>
+      Nowa Ankieta
+    </button>
+  </div>
+
+  <div class="cards-grid">
+    @for (survey of surveys; track survey.id) {
+      <mat-card class="survey-card">
+        
+        <mat-card-header>
+          <mat-card-title>{{ survey.title }}</mat-card-title>
+          <mat-card-subtitle>Status: {{ survey.status }}</mat-card-subtitle>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <p class="responses-count">Liczba odpowiedzi: <strong>{{ survey.responses }}</strong></p>
+        </mat-card-content>
+        
+        <mat-card-actions class="card-actions">
+          <button mat-button color="primary">Edytuj</button>
+          <button mat-button color="warn">Usuń</button>
+        </mat-card-actions>
+
+      </mat-card>
+    } @empty {
+      <p>Nie masz jeszcze żadnych ankiet. Stwórz swoją pierwszą ankietę!</p>
+    }
+  </div>
+</div>
