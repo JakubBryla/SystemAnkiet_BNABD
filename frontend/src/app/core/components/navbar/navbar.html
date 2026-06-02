@@ -2,7 +2,7 @@
   <span class="logo" routerLink="/">System Ankiet</span>
   
   <span class="spacer"></span> <div class="nav-actions">
-    @if (authService.isLoggedInSignal()) {
+    @if (authService.isLoggedIn()) {
       
       <button mat-button routerLink="/dashboard">Panel główny</button>
       <span style="flex: 1 1 auto;"></span><button mat-flat-button color="warn" (click)="authService.logout()">Wyloguj</button>

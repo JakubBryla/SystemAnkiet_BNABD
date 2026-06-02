@@ -1,4 +1,5 @@
-import { Component, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, ChangeDetectorRef, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,15 +17,28 @@ import { DeleteSurveyDialog } from '../delete-survey-dialog/delete-survey-dialog
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
-export class Dashboard {
+export class Dashboard implements OnInit {
   private dialog = inject(MatDialog);
   private cdr = inject(ChangeDetectorRef);
-  // mock baza danych ankiet na potrzeby frontendu
-  surveys = [
-    { id: 1, title: 'Ankieta satysfakcji klienta', status: 'Aktywna', responses: 15 },
-    { id: 2, title: 'Badanie rynku IT 2026', status: 'Zakończona', responses: 142 },
-    { id: 3, title: 'Ocena szkolenia', status: 'Szkic', responses: 0 }
-  ];
+  private http = inject(HttpClient);
+
+  private apiUrl = 'http://localhost:8080/api/surveys';
+
+  surveys: { id: number; title: string; status: string; responses: number }[] = [];
+
+  ngOnInit() {
+    this.loadSurveys();
+  }
+
+  loadSurveys() {
+    this.http.get<any[]>(this.apiUrl).subscribe({
+      next: (data) => {
+        this.surveys = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Błąd ładowania ankiet:', err)
+    });
+  }
 
   openCreateSurveyDialog() {
     const dialogRef = this.dialog.open(CreateSurveyDialog, {
@@ -33,22 +47,14 @@ export class Dashboard {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        // Obliczanie nowego ID (największe obecne + 1)
-        const newId = this.surveys.length > 0 ? Math.max(...this.surveys.map(s => s.id)) + 1 : 1;
-        
-        // Dodanie nowej ankietę do mock bazy
-        this.surveys = [
-          ...this.surveys, 
-          {
-            id: newId,
-            title: result,
-            status: 'Szkic',
-            responses: 0
-          }
-        ];
-        this.cdr.detectChanges();
-        
-        console.log('Nowa ankieta została pomyślnie dodana!');
+        this.http.post<any>(this.apiUrl, { title: result }).subscribe({
+          next: (created) => {
+            this.surveys = [...this.surveys, created];
+            this.cdr.detectChanges();
+            console.log('Nowa ankieta została pomyślnie dodana!');
+          },
+          error: (err) => console.error('Błąd tworzenia ankiety:', err)
+        });
       }
     });
   }
@@ -56,20 +62,19 @@ export class Dashboard {
   deleteSurvey(surveyId: number, surveyTitle: string) {
     const dialogRef = this.dialog.open(DeleteSurveyDialog, {
       width: '400px',
-      data: { title: surveyTitle } 
+      data: { title: surveyTitle }
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result === true) {
-        
-        // Zastąpić poniższy kod rzeczywistym wywołaniem API do usunięcia ankiety z backendu
-        // Zostawiamy w tablicy tylko te ankiety, których ID nie równa się usuwanemu ID
-        this.surveys = this.surveys.filter(s => s.id !== surveyId);
-        
-        // odświeżenie kafelków po usunięciu ankiety
-        this.cdr.detectChanges();
-        
-        console.log(`Ankieta "${surveyTitle}" została usunięta!`);
+        this.http.delete(`${this.apiUrl}/${surveyId}`).subscribe({
+          next: () => {
+            this.surveys = this.surveys.filter(s => s.id !== surveyId);
+            this.cdr.detectChanges();
+            console.log(`Ankieta "${surveyTitle}" została usunięta!`);
+          },
+          error: (err) => console.error('Błąd usuwania ankiety:', err)
+        });
       }
     });
   }
