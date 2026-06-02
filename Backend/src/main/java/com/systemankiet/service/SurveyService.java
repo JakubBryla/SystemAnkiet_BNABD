@@ -2,11 +2,14 @@ package com.systemankiet.service;
 
 import com.systemankiet.dto.CreateSurveyRequest;
 import com.systemankiet.dto.QuestionDto;
+import com.systemankiet.dto.SurveyDetailDto;
 import com.systemankiet.dto.SurveyDto;
+import com.systemankiet.dto.UpdateSurveyStatusRequest;
 import com.systemankiet.entity.AnswerOption;
 import com.systemankiet.entity.Question;
 import com.systemankiet.entity.Survey;
 import com.systemankiet.entity.User;
+import com.systemankiet.enums.SurveyStatus;
 import com.systemankiet.repository.SurveyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -42,9 +45,11 @@ public class SurveyService {
         if (request.getQuestions() != null) {
             for (QuestionDto qDto : request.getQuestions()) {
                 if (qDto == null) continue;
+
                 Question question = new Question();
                 question.setQuestionText(qDto.getText().trim());
                 question.setQuestionType(qDto.getType().trim());
+                question.setRequired(qDto.isRequired());
                 question.setSurvey(survey);
                 question.setOptions(new ArrayList<>());
 
@@ -62,8 +67,25 @@ public class SurveyService {
             }
         }
 
-        Survey saved = surveyRepository.save(survey);
-        return SurveyDto.fromEntity(saved);
+        return SurveyDto.fromEntity(surveyRepository.save(survey));
+    }
+
+    @Transactional
+    public SurveyDto updateSurveyStatus(Long id, UpdateSurveyStatusRequest request, User user) {
+        Survey survey = surveyRepository.findByIdAndCreatedBy(id, user)
+                .orElseThrow(() -> new NoSuchElementException("Ankieta nie znaleziona lub brak uprawnien"));
+
+        SurveyStatus newStatus = SurveyStatus.valueOf(request.getStatus().toUpperCase());
+        survey.setStatus(newStatus);
+
+        return SurveyDto.fromEntity(surveyRepository.save(survey));
+    }
+
+    @Transactional(readOnly = true)
+    public SurveyDetailDto getPublicSurvey(Long id) {
+        Survey survey = surveyRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Ankieta nie znaleziona"));
+        return SurveyDetailDto.fromEntity(survey);
     }
 
     @Transactional
