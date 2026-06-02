@@ -3,6 +3,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
+import { RouterModule } from '@angular/router';
 import { CreateSurveyDialog } from '../create-survey-dialog/create-survey-dialog';
 import { DeleteSurveyDialog } from '../delete-survey-dialog/delete-survey-dialog';
 
@@ -11,7 +12,8 @@ import { DeleteSurveyDialog } from '../delete-survey-dialog/delete-survey-dialog
   imports: [
     MatCardModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    RouterModule
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
