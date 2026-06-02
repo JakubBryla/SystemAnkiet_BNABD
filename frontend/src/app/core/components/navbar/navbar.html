@@ -1,5 +1,16 @@
-<mat-toolbar color="primary">
-  <span>System Ankiet</span>
-  <span style="flex: 1 1 auto;"></span> <button mat-button routerLink="/login">Logowanie</button>
-  <button mat-flat-button color="accent" routerLink="/register">Rejestracja</button>
+<mat-toolbar color="primary" class="navbar">
+  <span class="logo" routerLink="/">System Ankiet</span>
+  
+  <span class="spacer"></span> <div class="nav-actions">
+    @if (authService.isLoggedInSignal()) {
+      
+      <button mat-button routerLink="/dashboard">Panel główny</button>
+      <span style="flex: 1 1 auto;"></span><button mat-flat-button color="warn" (click)="authService.logout()">Wyloguj</button>
+      
+    } @else { 
+      <span style="flex: 1 1 auto;"></span><button mat-button routerLink="/login">Logowanie</button>
+      <button mat-flat-button color="accent" routerLink="/register">Rejestracja</button>
+      
+    }
+  </div>
 </mat-toolbar>
