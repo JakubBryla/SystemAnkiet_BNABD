@@ -1,0 +1,114 @@
+<div class="filler-container">
+  
+  @switch (viewState) {
+    
+    @case ('loading') {
+      <div class="message-card">
+        <h2>Pobieranie ankiety...</h2>
+      </div>
+    }
+
+    @case ('closed') {
+      <mat-card class="message-card">
+        <mat-card-header>
+          <div mat-card-avatar><mat-icon color="warn">lock</mat-icon></div>
+          <mat-card-title>Ankieta zamknięta</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Zbieranie odpowiedzi w tej ankiecie zostało już zakończone.</p>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    @case ('draft') {
+      <mat-card class="message-card">
+        <mat-card-header>
+          <div mat-card-avatar><mat-icon>edit_note</mat-icon></div>
+          <mat-card-title>Ankieta nieaktywna</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Ta ankieta jest w fazie przygotowań i nie można jej jeszcze wypełniać.</p>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    @case ('active') {
+      <mat-card class="survey-header">
+        <mat-card-content>
+          <h1>{{ survey?.title }}</h1>
+          @if (survey?.description) {
+            <p class="description">{{ survey?.description }}</p>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <form [formGroup]="answersForm" (ngSubmit)="submitAnswers()">
+        
+        @for (question of survey?.questions; track question.id; let i = $index) {
+          
+          <mat-card class="question-card">
+            <mat-card-header>
+              <mat-card-title>Pytanie {{ i + 1 }}</mat-card-title>
+            </mat-card-header>
+            
+            <mat-card-content>
+              <p class="question-text">
+                {{ question.text }}
+                @if (question.isRequired) {
+                  <span class="required-asterisk">*</span>
+                }
+              </p>
+
+              @switch (question.type) {
+                
+                @case ('short-answer') {
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Twoja odpowiedź</mat-label>
+                    <input matInput [formControlName]="question.id.toString()" placeholder="Wpisz odpowiedź...">
+                  </mat-form-field>
+                }
+
+                @case ('single-choice') {
+                  <mat-radio-group [formControlName]="question.id.toString()" class="radio-group">
+                    @for (option of question.options; track option) {
+                      <mat-radio-button [value]="option">{{ option }}</mat-radio-button>
+                    }
+                  </mat-radio-group>
+                }
+
+                @case ('multiple-choice') {
+                  <div class="checkbox-group">
+                    @for (option of question.options; track option) {
+                      <mat-checkbox 
+                        [value]="option"
+                        (change)="onCheckboxChange($event, question.id, option)"
+                      >
+                        {{ option }}
+                      </mat-checkbox>
+                    }
+                  </div>
+                }
+
+              }
+            </mat-card-content>
+          </mat-card>
+          
+        }
+
+        <div class="submit-action">
+          <button mat-flat-button color="primary" type="submit" [disabled]="answersForm.invalid" class="submit-btn">
+            Wyślij odpowiedzi
+          </button>
+        </div>
+
+      </form>
+    }
+
+    @default {
+      <div class="message-card">
+        <h2>404 - Nie znaleziono ankiety</h2>
+      </div>
+    }
+  }
+
+</div>
