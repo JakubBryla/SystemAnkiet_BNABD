@@ -32,13 +32,9 @@ export class Register {
 
   onSubmit() {
     if (this.registerForm.valid) {
-      const userData = this.registerForm.value;
-      
+      const { confirmPassword, ...userData } = this.registerForm.value;
+
       this.auth.register(userData);
-      
-      console.log('Komponent Rejestracji: Przekazałem dane nowego użytkownika do serwisu!');
-    } else {
-      console.log('Formularz zawiera błędy!');
     }
   }
 }

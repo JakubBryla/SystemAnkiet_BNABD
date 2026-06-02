@@ -24,12 +24,8 @@ export class Login {
   onSubmit() {
     if (this.loginForm.valid) {
       const credentials = this.loginForm.value;
-      
+
       this.auth.login(credentials);
-      
-      console.log('Komponent Logowania: Przekazałem dane do serwisu!');
-    } else {
-      console.log('Formularz jest niepoprawny.');
     }
   }
 }
