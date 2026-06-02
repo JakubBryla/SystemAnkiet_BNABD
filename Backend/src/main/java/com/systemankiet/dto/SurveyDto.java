@@ -10,6 +10,7 @@ public class SurveyDto {
 
     private Long id;
     private String title;
+    private String description;
     private String status;
     private int responses;
     private LocalDateTime createdAt;
@@ -18,6 +19,7 @@ public class SurveyDto {
         SurveyDto dto = new SurveyDto();
         dto.setId(survey.getId());
         dto.setTitle(survey.getTitle());
+        dto.setDescription(survey.getDescription());
         dto.setStatus(survey.getStatus().getDisplayName());
         dto.setResponses(survey.getResponsesCount());
         dto.setCreatedAt(survey.getCreatedAt());

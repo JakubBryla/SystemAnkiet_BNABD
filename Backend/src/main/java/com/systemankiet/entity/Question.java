@@ -28,6 +28,9 @@ public class Question {
     @Column(name = "question_type", nullable = false)
     private String questionType;
 
+    @Column(name = "is_required", nullable = false)
+    private boolean required;
+
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderColumn(name = "option_order")
     private List<AnswerOption> options = new ArrayList<>();
