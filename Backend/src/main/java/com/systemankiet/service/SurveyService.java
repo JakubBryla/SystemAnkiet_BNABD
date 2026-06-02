@@ -40,32 +40,7 @@ public class SurveyService {
         survey.setTitle(request.getTitle().trim());
         survey.setDescription(request.getDescription());
         survey.setCreatedBy(user);
-        survey.setQuestions(new ArrayList<>());
-
-        if (request.getQuestions() != null) {
-            for (QuestionDto qDto : request.getQuestions()) {
-                if (qDto == null) continue;
-
-                Question question = new Question();
-                question.setQuestionText(qDto.getText().trim());
-                question.setQuestionType(qDto.getType().trim());
-                question.setRequired(qDto.isRequired());
-                question.setSurvey(survey);
-                question.setOptions(new ArrayList<>());
-
-                if (qDto.getOptions() != null) {
-                    for (String optText : qDto.getOptions()) {
-                        if (optText == null || optText.isBlank()) continue;
-                        AnswerOption option = new AnswerOption();
-                        option.setOptionText(optText.trim());
-                        option.setQuestion(question);
-                        question.getOptions().add(option);
-                    }
-                }
-
-                survey.getQuestions().add(question);
-            }
-        }
+        survey.setQuestions(buildQuestions(request.getQuestions(), survey));
 
         return SurveyDto.fromEntity(surveyRepository.save(survey));
     }
@@ -78,33 +53,8 @@ public class SurveyService {
         survey.setTitle(request.getTitle().trim());
         survey.setDescription(request.getDescription());
 
-        // Usuniecie starych pytan (orphanRemoval = true usuwa je z bazy)
         survey.getQuestions().clear();
-
-        if (request.getQuestions() != null) {
-            for (QuestionDto qDto : request.getQuestions()) {
-                if (qDto == null) continue;
-
-                Question question = new Question();
-                question.setQuestionText(qDto.getText().trim());
-                question.setQuestionType(qDto.getType().trim());
-                question.setRequired(qDto.isRequired());
-                question.setSurvey(survey);
-                question.setOptions(new ArrayList<>());
-
-                if (qDto.getOptions() != null) {
-                    for (String optText : qDto.getOptions()) {
-                        if (optText == null || optText.isBlank()) continue;
-                        AnswerOption option = new AnswerOption();
-                        option.setOptionText(optText.trim());
-                        option.setQuestion(question);
-                        question.getOptions().add(option);
-                    }
-                }
-
-                survey.getQuestions().add(question);
-            }
-        }
+        survey.getQuestions().addAll(buildQuestions(request.getQuestions(), survey));
 
         return SurveyDto.fromEntity(surveyRepository.save(survey));
     }
@@ -132,5 +82,36 @@ public class SurveyService {
         Survey survey = surveyRepository.findByIdAndCreatedBy(id, user)
                 .orElseThrow(() -> new NoSuchElementException("Ankieta nie znaleziona lub brak uprawnien"));
         surveyRepository.delete(survey);
+    }
+
+    // --- Metoda pomocnicza ---
+
+    private List<Question> buildQuestions(List<QuestionDto> questionDtos, Survey survey) {
+        if (questionDtos == null) return new ArrayList<>();
+
+        List<Question> result = new ArrayList<>();
+        for (QuestionDto qDto : questionDtos) {
+            if (qDto == null) continue;
+
+            Question question = new Question();
+            question.setQuestionText(qDto.getText().trim());
+            question.setQuestionType(qDto.getType().trim());
+            question.setRequired(Boolean.TRUE.equals(qDto.getIsRequired()));
+            question.setSurvey(survey);
+            question.setOptions(new ArrayList<>());
+
+            if (qDto.getOptions() != null) {
+                for (String optText : qDto.getOptions()) {
+                    if (optText == null || optText.isBlank()) continue;
+                    AnswerOption option = new AnswerOption();
+                    option.setOptionText(optText.trim());
+                    option.setQuestion(question);
+                    question.getOptions().add(option);
+                }
+            }
+
+            result.add(question);
+        }
+        return result;
     }
 }
