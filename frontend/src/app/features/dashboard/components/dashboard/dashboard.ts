@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateSurveyDialog } from '../create-survey-dialog/create-survey-dialog';
+import { DeleteSurveyDialog } from '../delete-survey-dialog/delete-survey-dialog';
 
 @Component({
   selector: 'app-dashboard',
@@ -48,6 +49,27 @@ export class Dashboard {
         this.cdr.detectChanges();
         
         console.log('Nowa ankieta została pomyślnie dodana!');
+      }
+    });
+  }
+
+  deleteSurvey(surveyId: number, surveyTitle: string) {
+    const dialogRef = this.dialog.open(DeleteSurveyDialog, {
+      width: '400px',
+      data: { title: surveyTitle } 
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === true) {
+        
+        // Zastąpić poniższy kod rzeczywistym wywołaniem API do usunięcia ankiety z backendu
+        // Zostawiamy w tablicy tylko te ankiety, których ID nie równa się usuwanemu ID
+        this.surveys = this.surveys.filter(s => s.id !== surveyId);
+        
+        // odświeżenie kafelków po usunięciu ankiety
+        this.cdr.detectChanges();
+        
+        console.log(`Ankieta "${surveyTitle}" została usunięta!`);
       }
     });
   }

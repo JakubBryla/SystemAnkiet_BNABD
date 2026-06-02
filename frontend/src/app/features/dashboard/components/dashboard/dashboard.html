@@ -22,7 +22,10 @@
         
         <mat-card-actions class="card-actions">
           <button mat-button color="primary">Edytuj</button>
-          <button mat-button color="warn">Usuń</button>
+          
+          <button mat-button color="warn" (click)="deleteSurvey(survey.id, survey.title)">
+            Usuń
+          </button>
         </mat-card-actions>
 
       </mat-card>
