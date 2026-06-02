@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 
@@ -13,11 +13,11 @@ export class Auth {
   private router = inject(Router);
 
   // mock zmienna udająca stan zalogowania - w przyszłości będzie to token JWT 
-  private loggedIn = false;
+  public isLoggedInSignal = signal<boolean>(false);
 
   isLoggedIn(): boolean {
     // w przyszłości będziemy tu sprawdzany prawdziwy token JWT z przeglądarki
-    return this.loggedIn;
+    return this.isLoggedInSignal();
   }
 
   login(credentials: any) {
@@ -26,8 +26,16 @@ export class Auth {
     // return this.http.post(`${this.apiUrl}/login`, credentials);
 
     // symulacja udanego logowania - w przyszłości usuniemy ten kod i będziemy polegać na odpowiedzi z backendu
-    this.loggedIn = true; 
+    this.isLoggedInSignal.set(true); 
     this.router.navigate(['/dashboard']);
+  }
+
+  logout() {
+    console.log('Wylogowywanie...');
+    // w przyszłości usunąć token JWT z localStorage
+    // localStorage.removeItem('token');
+    this.isLoggedInSignal.set(false);
+    this.router.navigate(['/login']);
   }
 
   register(userData: any) {
