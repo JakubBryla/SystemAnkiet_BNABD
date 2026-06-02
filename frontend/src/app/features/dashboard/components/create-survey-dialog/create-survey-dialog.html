@@ -6,8 +6,8 @@
   <mat-form-field appearance="outline" class="full-width">
     <mat-label>Tytuł ankiety</mat-label>
     <input matInput [formControl]="titleControl" placeholder="np. Badanie zadowolenia klientów" (keyup.enter)="onSave()">
-    @if (titleControl.hasError('required')) {
-      <mat-error>Tytuł jest wymagany</mat-error>
+    @if (titleControl.hasError('required') || titleControl.hasError('whitespace')) {
+      <mat-error>Prawidłowy tytuł jest wymagany</mat-error>
     }
   </mat-form-field>
 </mat-dialog-content>

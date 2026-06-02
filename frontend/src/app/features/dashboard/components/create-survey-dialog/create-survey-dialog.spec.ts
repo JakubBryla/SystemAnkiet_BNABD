@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { MatDialogRef } from '@angular/material/dialog';
 import { CreateSurveyDialog } from './create-survey-dialog';
 
 describe('CreateSurveyDialog', () => {
@@ -9,6 +9,14 @@ describe('CreateSurveyDialog', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [CreateSurveyDialog],
+      providers: [
+        {
+          provide: MatDialogRef,
+          useValue: {
+            close: () => { /* empty */ }
+          }
+        }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(CreateSurveyDialog);
