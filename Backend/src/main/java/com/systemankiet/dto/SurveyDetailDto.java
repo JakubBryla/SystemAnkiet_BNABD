@@ -18,6 +18,8 @@ public class SurveyDetailDto {
     private String description;
     private String status;
     private String type;
+    // Domena organizacji twórcy — używana przez frontend do weryfikacji dostępu do ankiet INTERNAL
+    private String creatorDomain;
     private List<QuestionDto> questions;
     // Czy ankieta ma już zapisane odpowiedzi — pytania są wtedy zablokowane do edycji
     private boolean hasResponses;
@@ -30,6 +32,7 @@ public class SurveyDetailDto {
         dto.setDescription(survey.getDescription());
         dto.setStatus(survey.getStatus().getDisplayName());
         dto.setType(survey.getType() != null ? survey.getType().getDisplayName() : "external");
+        dto.setCreatorDomain(survey.getCreatedBy() != null ? survey.getCreatedBy().getDomain() : null);
         dto.setQuestions(
             survey.getQuestions().stream()
                 .map(QuestionDto::fromEntity)
