@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, DestroyRef } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -14,7 +15,6 @@ import { MatDividerModule } from '@angular/material/divider';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-
 export function atLeastOneQuestion(control: AbstractControl): ValidationErrors | null {
   return control.value && control.value.length > 0 ? null : { requireQuestion: true };
 }
@@ -22,14 +22,11 @@ export function atLeastOneQuestion(control: AbstractControl): ValidationErrors |
 export const optionsValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
   const type = control.get('type')?.value;
   const options = control.get('options') as FormArray;
-
   if ((type === 'single-choice' || type === 'multiple-choice') && options.length === 0) {
     return { noOptions: true };
   }
-  
   return null;
 };
-
 
 @Component({
   selector: 'app-survey-creator',
@@ -50,30 +47,58 @@ export const optionsValidator: ValidatorFn = (control: AbstractControl): Validat
   styleUrl: './survey-creator.scss',
 })
 export class SurveyCreator implements OnInit {
-  private fb = inject(FormBuilder); 
+  private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private http = inject(HttpClient);
   private destroyRef = inject(DestroyRef);
+
+  private apiUrl = 'http://localhost:8080/api/surveys';
+  private surveyId: string | null = null;
+
   surveyForm!: FormGroup;
+  isSaving = false;
+  saveError: string | null = null;
 
   ngOnInit() {
-    // Kiedy komponent się ładuje, budujemy szkielet formularza
     this.surveyForm = this.fb.group({
       title: ['', Validators.required],
       description: [''],
       accessType: ['EXTERNAL', Validators.required],
-      questions: this.fb.array([], atLeastOneQuestion) 
+      questions: this.fb.array([], atLeastOneQuestion)
     });
 
-    // puste pytanie, żeby użytkownik miał od czego zacząć
-    this.addQuestion();
-    const surveyId = this.route.snapshot.paramMap.get('id');
+    this.surveyId = this.route.snapshot.paramMap.get('id');
 
-    if (surveyId) {
-      this.surveyForm.patchValue({
-        // symulacja tytułu (docelowo pobierzemy go z bazy przez API)
-        title: `Edycja ankiety nr ${surveyId}`
+    if (this.surveyId) {
+      // Wczytaj istniejącą ankietę z backendu
+      this.http.get<any>(`${this.apiUrl}/${this.surveyId}/public`).subscribe({
+        next: (data) => {
+          this.surveyForm.patchValue({
+            title: data.title,
+            description: data.description ?? '',
+            accessType: (data.type ?? 'external').toUpperCase()
+          });
+
+          // Wypełnij pytania z backendu
+          this.questions.clear();
+          (data.questions ?? []).forEach((q: any) => {
+            this.questions.push(this.createQuestionForm(q));
+          });
+
+          // Jeśli ankieta nie ma jeszcze żadnych pytań — dodaj jedno puste
+          if (this.questions.length === 0) {
+            this.addQuestion();
+          }
+        },
+        error: (err) => {
+          console.error('Błąd ładowania ankiety do edycji:', err);
+          this.addQuestion();
+        }
       });
+    } else {
+      // Nowa ankieta — zacznij od jednego pustego pytania
+      this.addQuestion();
     }
   }
 
@@ -85,16 +110,22 @@ export class SurveyCreator implements OnInit {
     return this.questions.at(questionIndex).get('options') as FormArray;
   }
 
-  addQuestion() {
+  // Tworzy FormGroup dla pytania — opcjonalnie wypełniony danymi z backendu
+  private createQuestionForm(data?: any): FormGroup {
     const questionForm = this.fb.group({
-      text: ['', Validators.required], 
-      type: ['short-answer', Validators.required],
-      isRequired: [true],
-      options: this.fb.array([]),
-      isControlQuestion: [false],
-      expectedValue: [''] 
+      text: [data?.text ?? '', Validators.required],
+      type: [data?.type ?? 'short-answer', Validators.required],
+      isRequired: [data?.isRequired ?? true],
+      options: this.fb.array(
+        (data?.options ?? []).map((opt: string) =>
+          this.fb.control(opt, Validators.required)
+        )
+      ),
+      isControlQuestion: [data?.isControlQuestion ?? false],
+      expectedValue: [data?.expectedValue ?? '']
     }, { validators: optionsValidator });
-    
+
+    // Walidator expectedValue aktywny tylko gdy pytanie jest kontrolne
     questionForm.get('isControlQuestion')?.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(isControl => {
@@ -108,7 +139,11 @@ export class SurveyCreator implements OnInit {
         expectedValueControl?.updateValueAndValidity();
       });
 
-    this.questions.push(questionForm);
+    return questionForm;
+  }
+
+  addQuestion() {
+    this.questions.push(this.createQuestionForm());
   }
 
   removeQuestion(index: number) {
@@ -125,28 +160,52 @@ export class SurveyCreator implements OnInit {
     const options = question.get('options') as FormArray;
     const expectedValueCtrl = question.get('expectedValue');
     const removedValue = options.at(optIndex).value;
-    
+
     if (expectedValueCtrl?.value === removedValue) {
       expectedValueCtrl?.setValue('');
     }
-    
+
     options.removeAt(optIndex);
   }
 
   saveSurvey() {
-    if (this.surveyForm.valid) {
-      const finalSurveyData = this.surveyForm.value;
-      
-      console.log('GOTOWA ANKIETA DO WYSŁANIA NA BACKEND');
-      console.log(finalSurveyData);
-      
-      // w przyszłości tutaj wywołamy serwis, który wyśle dane do backendu. Na razie tylko alert i przekierowanie
-      
-      alert('Ankieta została zapisana pomyślnie!');
-      
-      this.router.navigate(['/dashboard']);
-    }
-  }
+    if (this.surveyForm.invalid) return;
 
-  
+    this.isSaving = true;
+    this.saveError = null;
+
+    const formValue = this.surveyForm.value;
+
+    // Mapowanie formularza na format backendu
+    const payload = {
+      title: formValue.title.trim(),
+      description: formValue.description ?? '',
+      type: formValue.accessType,  // accessType (frontend) → type (backend)
+      questions: (formValue.questions ?? []).map((q: any) => ({
+        text: q.text,
+        type: q.type,
+        isRequired: q.isRequired,
+        options: q.options ?? [],
+        isControlQuestion: q.isControlQuestion ?? false,
+        expectedValue: q.expectedValue || null,
+        failStatus: null
+      }))
+    };
+
+    const request$ = this.surveyId
+      ? this.http.put<any>(`${this.apiUrl}/${this.surveyId}`, payload)
+      : this.http.post<any>(this.apiUrl, payload);
+
+    request$.subscribe({
+      next: () => {
+        this.isSaving = false;
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err) => {
+        this.isSaving = false;
+        this.saveError = err.error?.error || 'Błąd podczas zapisywania ankiety.';
+        console.error('Błąd zapisywania:', err);
+      }
+    });
+  }
 }

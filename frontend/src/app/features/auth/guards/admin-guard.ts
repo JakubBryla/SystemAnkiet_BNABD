@@ -6,7 +6,7 @@ export const adminGuard: CanActivateFn = (route, state) => {
   const authService = inject(Auth);
   const router = inject(Router);
 
-  if (authService.isLoggedIn() && authService.userRoleSignal() === 'ADMIN') {
+  if (authService.isLoggedIn() && authService.getRole() === 'ADMIN') {
     return true; 
   } else {
     console.warn('Odmowa dostępu: Brak uprawnień administratora.');

@@ -1,6 +1,7 @@
 package com.systemankiet.entity;
 
 import com.systemankiet.enums.SurveyStatus;
+import com.systemankiet.enums.SurveyType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,6 +29,13 @@ public class Survey {
     @Enumerated(EnumType.STRING)
     private SurveyStatus status;
 
+    // EXTERNAL - link publiczny, każdy może wypełnić bez logowania
+    // INTERNAL - tylko zalogowani użytkownicy tej samej organizacji
+    // columnDefinition z DEFAULT pozwala Hibernate dodać kolumnę do niepustej tabeli (SQL Server)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "NVARCHAR(255) DEFAULT 'EXTERNAL'")
+    private SurveyType type;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -44,6 +52,9 @@ public class Survey {
         createdAt = LocalDateTime.now();
         if (status == null) {
             status = SurveyStatus.DRAFT;
+        }
+        if (type == null) {
+            type = SurveyType.EXTERNAL;
         }
     }
 }

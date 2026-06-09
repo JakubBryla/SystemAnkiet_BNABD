@@ -23,17 +23,24 @@ export class Login {
   });
 
   serverError = signal<string | null>(null);
+  isLoading = signal<boolean>(false);
 
   onSubmit() {
-    if (this.loginForm.valid) {
-      this.serverError.set(null);
-      const credentials = this.loginForm.value;
+    if (this.loginForm.invalid) return;
 
-      // Wywołanie serwisu Auth
-      this.auth.login(credentials);
-      
-      // błąd logowania do testu
-      // this.serverError.set('Nieprawidłowy adres e-mail lub hasło.');
-    }
+    this.serverError.set(null);
+    this.isLoading.set(true);
+
+    this.auth.login(this.loginForm.getRawValue()).subscribe({
+      next: () => {
+        this.isLoading.set(false);
+        // Nawigacja jest obsługiwana w auth.ts (tap operator)
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        const msg = err.error?.error || 'Nieprawidłowy adres e-mail lub hasło.';
+        this.serverError.set(msg);
+      }
+    });
   }
 }

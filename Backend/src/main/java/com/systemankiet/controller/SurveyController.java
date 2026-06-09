@@ -22,13 +22,19 @@ public class SurveyController {
 
     private final SurveyService surveyService;
 
-    // Pobiera liste ankiet zalogowanego uzytkownika
+    // Ankiety stworzone przez zalogowanego uzytkownika
     @GetMapping
     public ResponseEntity<List<SurveyDto>> getUserSurveys(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(surveyService.getUserSurveys(user));
     }
 
-    // Publiczny endpoint - zwraca pelna ankiete z pytaniami (dla SurveyFiller, bez logowania)
+    // Ankiety wewnetrzne przypisane do uzytkownika (z jego organizacji, nie jego wlasne)
+    @GetMapping("/assigned")
+    public ResponseEntity<List<SurveyDto>> getAssignedSurveys(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(surveyService.getAssignedSurveys(user));
+    }
+
+    // Publiczny endpoint - zwraca pelna ankiete z pytaniami (dla SurveyFiller)
     @GetMapping("/{id}/public")
     public ResponseEntity<SurveyDetailDto> getPublicSurvey(@PathVariable Long id) {
         return ResponseEntity.ok(surveyService.getPublicSurvey(id));

@@ -8,7 +8,7 @@
       
       <button mat-button routerLink="/dashboard">Panel główny</button>
       
-      @if (authService.userRoleSignal() === 'ADMIN') {
+      @if (authService.getRole() === 'ADMIN') {
         <button mat-button color="accent" routerLink="/admin">Panel Admina</button>
       }
       
