@@ -17,6 +17,7 @@ public class SurveyDetailDto {
     private String title;
     private String description;
     private String status;
+    private String type;
     private List<QuestionDto> questions;
 
     public static SurveyDetailDto fromEntity(Survey survey) {
@@ -25,6 +26,7 @@ public class SurveyDetailDto {
         dto.setTitle(survey.getTitle());
         dto.setDescription(survey.getDescription());
         dto.setStatus(survey.getStatus().getDisplayName());
+        dto.setType(survey.getType() != null ? survey.getType().getDisplayName() : "external");
         dto.setQuestions(
             survey.getQuestions().stream()
                 .map(QuestionDto::fromEntity)

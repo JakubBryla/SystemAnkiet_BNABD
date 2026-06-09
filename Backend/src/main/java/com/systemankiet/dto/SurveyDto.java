@@ -12,6 +12,7 @@ public class SurveyDto {
     private String title;
     private String description;
     private String status;
+    private String type;
     private LocalDateTime createdAt;
 
     public static SurveyDto fromEntity(Survey survey) {
@@ -20,6 +21,7 @@ public class SurveyDto {
         dto.setTitle(survey.getTitle());
         dto.setDescription(survey.getDescription());
         dto.setStatus(survey.getStatus().getDisplayName());
+        dto.setType(survey.getType() != null ? survey.getType().getDisplayName() : "external");
         dto.setCreatedAt(survey.getCreatedAt());
         return dto;
     }

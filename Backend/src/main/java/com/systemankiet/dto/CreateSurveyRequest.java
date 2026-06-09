@@ -15,6 +15,9 @@ public class CreateSurveyRequest {
 
     private String description;
 
+    // "internal" lub "external" (domyslnie external jesli nie podano)
+    private String type;
+
     @Valid
     private List<QuestionDto> questions = new ArrayList<>();
 }
