@@ -28,8 +28,8 @@ export const routes: Routes = [
   },
   {
     path: 's/:id',
-    component: SurveyFiller,
-    canActivate: [authGuard]
+    component: SurveyFiller
+    // Bez authGuard - ankiety EXTERNAL muszą być dostępne bez logowania
   },
   {
     path: 'survey/:id/results',

@@ -100,12 +100,17 @@
           <button mat-button color="primary" [routerLink]="['/survey', survey.id, 'edit']">
             Edytuj
           </button>
-          
+
+          <button mat-button color="accent" [routerLink]="['/survey', survey.id, 'results']">
+            <mat-icon>bar_chart</mat-icon>
+            Wyniki
+          </button>
+
           <button mat-button (click)="shareSurvey(survey.id)" [disabled]="survey.status !== 'active'">
             <mat-icon>share</mat-icon>
             Udostępnij
           </button>
-          
+
           <button mat-button color="warn" (click)="deleteSurvey(survey.id, survey.title)">
             Usuń
           </button>

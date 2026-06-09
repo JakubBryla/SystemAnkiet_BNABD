@@ -1,69 +1,116 @@
 <div class="results-container">
-  <div class="results-header">
-    <div class="header-titles">
-      <h1>Wyniki Ankiety i Analiza</h1>
-      <p>
-        Podgląd statystyk w czasie rzeczywistym. Łączna liczba respondentów: 
-        <strong>{{ isDataCleaningEnabled ? '870 (Wiarygodnych)' : '950 (Surowych)' }}</strong>
-      </p>
+
+  @if (isLoading) {
+    <div style="display: flex; justify-content: center; padding: 48px;">
+      <mat-spinner></mat-spinner>
     </div>
-    
-    <div class="toolbar-actions" [class.active-filter]="isDataCleaningEnabled">
-      <mat-slide-toggle 
-        color="primary" 
-        [(ngModel)]="isDataCleaningEnabled" 
-        (change)="toggleDataCleaning()">
-        <mat-icon class="toggle-icon">filter_alt</mat-icon>
-        Algorytm Data Cleaning (Filtruj niespójne odpowiedzi)
-      </mat-slide-toggle>
-    </div>
-  </div>
-
-  <div class="charts-grid">
-    <mat-card class="chart-card">
+  } @else if (errorMessage) {
+    <mat-card style="margin: 24px auto; max-width: 500px;">
       <mat-card-header>
-        <mat-card-title>Pytanie 1: Jak oceniasz jakość usług?</mat-card-title>
-        <mat-card-subtitle>Wybór jednokrotny</mat-card-subtitle>
+        <mat-icon mat-card-avatar color="warn">error_outline</mat-icon>
+        <mat-card-title>Błąd</mat-card-title>
       </mat-card-header>
-      <mat-card-content class="chart-content">
-        <canvas baseChart
-          [data]="pieChartData"
-          [type]="pieChartType">
-        </canvas>
-      </mat-card-content>
+      <mat-card-content><p>{{ errorMessage }}</p></mat-card-content>
+      <mat-card-actions>
+        <button mat-button routerLink="/dashboard">Wróć do panelu</button>
+      </mat-card-actions>
     </mat-card>
+  } @else {
 
-    <mat-card class="chart-card">
-      <mat-card-header>
-        <mat-card-title>Pytanie 2: Z jakich produktów korzystasz?</mat-card-title>
-        <mat-card-subtitle>Wybór wielokrotny</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content class="chart-content">
-        <canvas baseChart
-          [data]="barChartData"
-          [options]="barChartOptions"
-          [type]="barChartType">
-        </canvas>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="chart-card text-card">
-      <mat-card-header>
-        <mat-card-title>Pytanie 3: Jakieś dodatkowe uwagi?</mat-card-title>
-        <mat-card-subtitle>Odpowiedź tekstowa (Otwarta)</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content class="chart-content text-content">
-        <div class="comments-list">
-          @for (comment of currentTextAnswers; track comment) {
-            <div class="comment-bubble">
-              <mat-icon class="comment-icon">chat_bubble_outline</mat-icon>
-              <span>{{ comment }}</span>
-            </div>
-          } @empty {
-            <p>Brak odpowiedzi na to pytanie.</p>
+    <div class="results-header">
+      <div class="header-titles">
+        <h1>{{ surveyTitle }} — Wyniki</h1>
+        <p>
+          Łącznie odpowiedzi: <strong>{{ allResponses.length }}</strong>
+          @if (flaggedCount > 0) {
+            &nbsp;|&nbsp; Oflagowane (podejrzane): <strong>{{ flaggedCount }}</strong>
           }
+          @if (isDataCleaningEnabled) {
+            &nbsp;|&nbsp; Po filtracji: <strong>{{ displayedResponses.length }}</strong>
+          }
+        </p>
+      </div>
+
+      @if (flaggedCount > 0) {
+        <div class="toolbar-actions" [class.active-filter]="isDataCleaningEnabled">
+          <mat-slide-toggle
+            color="primary"
+            [(ngModel)]="isDataCleaningEnabled"
+            (change)="toggleDataCleaning()">
+            <mat-icon class="toggle-icon">filter_alt</mat-icon>
+            Data Cleaning (ukryj podejrzane odpowiedzi)
+          </mat-slide-toggle>
         </div>
-      </mat-card-content>
-    </mat-card>
-  </div>
+      }
+    </div>
+
+    @if (allResponses.length === 0) {
+      <mat-card style="margin: 24px 0; text-align: center;">
+        <mat-card-content>
+          <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #9e9e9e;">inbox</mat-icon>
+          <p style="color: #666; margin-top: 8px;">Brak odpowiedzi — nikt jeszcze nie wypełnił tej ankiety.</p>
+        </mat-card-content>
+      </mat-card>
+    } @else {
+
+      <div class="charts-grid">
+        @for (stats of questionStats; track stats.id) {
+
+          <mat-card class="chart-card">
+            <mat-card-header>
+              <mat-card-title>{{ stats.text }}</mat-card-title>
+              <mat-card-subtitle>
+                @if (stats.type === 'short-answer') { Odpowiedź tekstowa }
+                @if (stats.type === 'single-choice') { Jednokrotny wybór }
+                @if (stats.type === 'multiple-choice') { Wielokrotny wybór }
+                &nbsp;· {{ stats.totalAnswers }} odpowiedzi
+              </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content class="chart-content">
+
+              @if (stats.type === 'short-answer') {
+                <div class="comments-list">
+                  @for (answer of stats.textAnswers; track $index) {
+                    <div class="comment-bubble">
+                      <mat-icon class="comment-icon">chat_bubble_outline</mat-icon>
+                      <span>{{ answer }}</span>
+                    </div>
+                  } @empty {
+                    <p style="color: #666;">Brak odpowiedzi na to pytanie.</p>
+                  }
+                </div>
+              }
+
+              @if (stats.type === 'single-choice') {
+                <canvas baseChart
+                  [data]="getPieData(stats)"
+                  [type]="pieChartType">
+                </canvas>
+              }
+
+              @if (stats.type === 'multiple-choice') {
+                <canvas baseChart
+                  [data]="getBarData(stats)"
+                  [options]="barChartOptions"
+                  [type]="barChartType">
+                </canvas>
+              }
+
+            </mat-card-content>
+          </mat-card>
+
+        }
+      </div>
+
+    }
+
+    <div style="margin-top: 16px;">
+      <button mat-button routerLink="/dashboard">
+        <mat-icon>arrow_back</mat-icon> Wróć do panelu
+      </button>
+    </div>
+
+  }
+
 </div>
