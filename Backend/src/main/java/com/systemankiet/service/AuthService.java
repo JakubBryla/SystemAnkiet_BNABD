@@ -35,7 +35,8 @@ public class AuthService {
     }
 
     public void register(RegisterRequest request) {
-        if (!request.getPassword().equals(request.getConfirmPassword())) {
+        if (request.getConfirmPassword() != null
+                && !request.getPassword().equals(request.getConfirmPassword())) {
             throw new IllegalArgumentException("Hasla nie sa takie same");
         }
 

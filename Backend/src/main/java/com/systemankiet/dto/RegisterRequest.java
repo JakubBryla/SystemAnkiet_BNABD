@@ -26,6 +26,7 @@ public class RegisterRequest {
     @Size(min = 8, message = "Haslo musi miec co najmniej 8 znakow")
     private String password;
 
-    @NotBlank(message = "Potwierdzenie hasla jest wymagane")
+    // Pole opcjonalne – walidacja zgodności haseł odbywa się po stronie frontendu.
+    // Backend sprawdza tylko gdy pole jest obecne w żądaniu.
     private String confirmPassword;
 }
