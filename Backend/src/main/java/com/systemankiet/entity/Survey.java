@@ -31,8 +31,9 @@ public class Survey {
 
     // EXTERNAL - link publiczny, każdy może wypełnić bez logowania
     // INTERNAL - tylko zalogowani użytkownicy tej samej organizacji
+    // columnDefinition z DEFAULT pozwala Hibernate dodać kolumnę do niepustej tabeli (SQL Server)
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "NVARCHAR(255) DEFAULT 'EXTERNAL'")
     private SurveyType type;
 
     @Column(name = "created_at")
