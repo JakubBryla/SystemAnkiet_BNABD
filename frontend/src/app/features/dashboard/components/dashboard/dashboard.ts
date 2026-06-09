@@ -65,19 +65,28 @@ export class Dashboard implements OnInit {
   pageSize = 6;
   pageIndex = 0;
 
+  get isAnkieterOrAdmin(): boolean {
+    const role = localStorage.getItem('role');
+    return role === 'ANKIETER' || role === 'ADMIN';
+  }
+
   ngOnInit() {
     this.loadSurveys();
   }
 
   private loadSurveys() {
-    this.http.get<any[]>(this.apiUrl).subscribe({
-      next: (data) => {
-        this.surveys = data.map(s => this.mapToSummary(s));
-        this.cdr.detectChanges();
-      },
-      error: (err) => console.error('Błąd ładowania ankiet:', err)
-    });
+    // Tylko ANKIETER i ADMIN mają własne ankiety
+    if (this.isAnkieterOrAdmin) {
+      this.http.get<any[]>(this.apiUrl).subscribe({
+        next: (data) => {
+          this.surveys = data.map(s => this.mapToSummary(s));
+          this.cdr.detectChanges();
+        },
+        error: (err) => console.error('Błąd ładowania ankiet:', err)
+      });
+    }
 
+    // Ankiety wewnętrzne do wypełnienia — dla wszystkich zalogowanych
     this.http.get<any[]>(`${this.apiUrl}/assigned`).subscribe({
       next: (data) => {
         this.assignedSurveys = data.map(s => this.mapToSummary(s));

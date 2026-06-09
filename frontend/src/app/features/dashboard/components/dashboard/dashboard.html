@@ -1,4 +1,6 @@
 <div class="dashboard-wrapper">
+
+  @if (isAnkieterOrAdmin) {
   <div class="dashboard-header">
     <h2>Twoje Ankiety</h2>
     <button mat-flat-button color="primary" (click)="openCreateSurveyDialog()">
@@ -135,6 +137,7 @@
       class="custom-paginator">
     </mat-paginator>
   }
+  } <!-- koniec @if (isAnkieterOrAdmin) -->
 
   @if (assignedSurveys.length > 0) {
     <div class="dashboard-header" style="margin-top: 40px;">
