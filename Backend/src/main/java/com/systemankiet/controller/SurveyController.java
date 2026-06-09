@@ -8,6 +8,9 @@ import com.systemankiet.entity.User;
 import com.systemankiet.service.SurveyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
 @RestController
 @RequestMapping("/api/surveys")
 @RequiredArgsConstructor
@@ -23,11 +27,30 @@ public class SurveyController {
 
     private final SurveyService surveyService;
 
-    // Ankiety stworzone przez zalogowanego uzytkownika — tylko SURVEYOR i ADMIN mogą tworzyć ankiety
+    // Ankiety stworzone przez zalogowanego uzytkownika z paginacja i filtrami po stronie backendu
     @GetMapping
     @PreAuthorize("hasAnyRole('SURVEYOR', 'ADMIN')")
-    public ResponseEntity<List<SurveyDto>> getUserSurveys(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(surveyService.getUserSurveys(user));
+    public ResponseEntity<Page<SurveyDto>> getUserSurveys(
+            @AuthenticationPrincipal User user,
+            @RequestParam(defaultValue = "0")    int page,
+            @RequestParam(defaultValue = "6")    int size,
+            @RequestParam(defaultValue = "")     String search,
+            @RequestParam(defaultValue = "all")  String status,
+            @RequestParam(defaultValue = "all")  String type,
+            @RequestParam(defaultValue = "createdAt") String sort,
+            @RequestParam(defaultValue = "desc") String dir) {
+
+        // Mapowanie nazw pol z frontendu na pola encji
+        String sortField = switch (sort) {
+            case "title"      -> "title";
+            case "status"     -> "status";
+            case "accessType" -> "type";
+            default           -> "createdAt";
+        };
+        Sort.Direction direction = "asc".equalsIgnoreCase(dir) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        org.springframework.data.domain.Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
+
+        return ResponseEntity.ok(surveyService.getUserSurveys(user, search, status, type, pageable));
     }
 
     // Ankiety wewnetrzne przypisane do uzytkownika — dostępne dla wszystkich zalogowanych

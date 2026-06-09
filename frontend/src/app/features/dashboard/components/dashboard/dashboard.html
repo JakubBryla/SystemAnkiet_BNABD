@@ -13,12 +13,12 @@
     <mat-form-field appearance="outline" class="filter-search">
       <mat-label>Wyszukaj po nazwie...</mat-label>
       <mat-icon matPrefix>search</mat-icon>
-      <input matInput [(ngModel)]="searchQuery" (ngModelChange)="pageIndex = 0">
+      <input matInput [(ngModel)]="searchQuery" (ngModelChange)="onFilterChange()">
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="filter-select">
       <mat-label>Grupa docelowa</mat-label>
-      <mat-select [(ngModel)]="filterAccessType" (ngModelChange)="pageIndex = 0">
+      <mat-select [(ngModel)]="filterAccessType" (ngModelChange)="onFilterChange()">
         <mat-option value="all">Wszystkie</mat-option>
         <mat-option value="INTERNAL">Wewnętrzne (Pracownicy)</mat-option>
         <mat-option value="EXTERNAL">Zewnętrzne (Klienci)</mat-option>
@@ -27,7 +27,7 @@
 
     <mat-form-field appearance="outline" class="filter-select">
       <mat-label>Status ankiety</mat-label>
-      <mat-select [(ngModel)]="filterStatus" (ngModelChange)="pageIndex = 0">
+      <mat-select [(ngModel)]="filterStatus" (ngModelChange)="onFilterChange()">
         <mat-option value="all">Wszystkie</mat-option>
         <mat-option value="active">Aktywne</mat-option>
         <mat-option value="draft">Szkice</mat-option>
@@ -38,21 +38,21 @@
     <div class="sort-group">
       <mat-form-field appearance="outline" class="filter-select">
         <mat-label>Sortuj według</mat-label>
-        <mat-select [(ngModel)]="sortBy" (ngModelChange)="pageIndex = 0">
+        <mat-select [(ngModel)]="sortBy" (ngModelChange)="onFilterChange()">
           <mat-option value="title">Nazwy</mat-option>
           <mat-option value="status">Statusu</mat-option>
           <mat-option value="accessType">Grupy docelowej</mat-option>
         </mat-select>
       </mat-form-field>
       
-      <button mat-icon-button (click)="sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'; pageIndex = 0" class="sort-dir-btn" color="primary">
+      <button mat-icon-button (click)="toggleSortDirection()" class="sort-dir-btn" color="primary">
         <mat-icon>{{ sortDirection === 'asc' ? 'arrow_downward' : 'arrow_upward' }}</mat-icon>
       </button>
     </div>
   </div>
 
   <div class="cards-grid">
-    @for (survey of paginatedSurveys; track survey.id) {
+    @for (survey of surveys; track survey.id) {
       <mat-card class="survey-card">
         
         <mat-card-header class="card-header-with-menu">
@@ -128,10 +128,11 @@
     }
   </div>
 
-  @if (processedSurveys.length > 0) {
+  @if (totalSurveys > 0) {
     <mat-paginator
-      [length]="processedSurveys.length"
+      [length]="totalSurveys"
       [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
       [pageSizeOptions]="[3, 6, 12, 24]"
       (page)="onPageChange($event)"
       class="custom-paginator">

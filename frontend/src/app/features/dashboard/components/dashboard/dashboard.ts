@@ -56,9 +56,14 @@ export class Dashboard implements OnInit {
 
   private apiUrl = 'http://localhost:8080/api/surveys';
 
+  // Bieżąca strona ankiet (treść z Page<SurveyDto> zwracanego przez backend)
   surveys: SurveySummary[] = [];
+  // Łączna liczba wyników — potrzebna do paginatora (page.totalElements)
+  totalSurveys = 0;
+
   assignedSurveys: SurveySummary[] = [];
 
+  // Filtry — każda zmiana trigguje nowe żądanie HTTP do backendu
   searchQuery = '';
   sortBy: 'title' | 'status' | 'accessType' = 'title';
   sortDirection: 'asc' | 'desc' = 'asc';
@@ -78,22 +83,37 @@ export class Dashboard implements OnInit {
       this.router.navigate(['/my-surveys']);
       return;
     }
-    this.loadSurveys();
+    this.reloadSurveys();
+    this.loadAssignedSurveys();
   }
 
-  private loadSurveys() {
-    // Tylko SURVEYOR i ADMIN mają własne ankiety
-    if (this.isAnkieterOrAdmin) {
-      this.http.get<any[]>(this.apiUrl).subscribe({
-        next: (data) => {
-          this.surveys = data.map(s => this.mapToSummary(s));
-          this.cdr.detectChanges();
-        },
-        error: (err) => console.error('Błąd ładowania ankiet:', err)
-      });
-    }
+  // Wysyła bieżące filtry i parametry strony do backendu
+  // Backend zwraca Spring Page<SurveyDto>: { content: [...], totalElements: N, ... }
+  private reloadSurveys() {
+    if (!this.isAnkieterOrAdmin) return;
 
-    // Ankiety wewnętrzne do wypełnienia — dla wszystkich zalogowanych
+    this.http.get<any>(this.apiUrl, {
+      params: {
+        page: this.pageIndex,
+        size: this.pageSize,
+        search: this.searchQuery,
+        status: this.filterStatus,
+        type: this.filterAccessType,
+        sort: this.sortBy,
+        dir: this.sortDirection
+      }
+    }).subscribe({
+      next: (pageResult) => {
+        this.surveys = (pageResult.content as any[]).map(s => this.mapToSummary(s));
+        this.totalSurveys = pageResult.totalElements;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Błąd ładowania ankiet:', err)
+    });
+  }
+
+  // Ankiety wewnętrzne do wypełnienia — osobna lista, bez paginacji (zwykle mała liczba)
+  private loadAssignedSurveys() {
     this.http.get<any[]>(`${this.apiUrl}/assigned`).subscribe({
       next: (data) => {
         this.assignedSurveys = data.map(s => this.mapToSummary(s));
@@ -101,6 +121,19 @@ export class Dashboard implements OnInit {
       },
       error: (err) => console.error('Błąd ładowania przypisanych ankiet:', err)
     });
+  }
+
+  // Wywoływane przez filtry (search, status, typ, sort) — resetuje stronę i pobiera wyniki
+  onFilterChange() {
+    this.pageIndex = 0;
+    this.reloadSurveys();
+  }
+
+  // Przełącza kierunek sortowania i odświeża listę
+  toggleSortDirection() {
+    this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    this.pageIndex = 0;
+    this.reloadSurveys();
   }
 
   // Backend zwraca type jako lowercase ('internal'/'external'), mapujemy na UPPERCASE dla UI
@@ -131,9 +164,9 @@ export class Dashboard implements OnInit {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.http.post<any>(this.apiUrl, { title: result, description: '' }).subscribe({
-          next: (created) => {
-            this.surveys = [...this.surveys, this.mapToSummary(created)];
-            this.cdr.detectChanges();
+          next: () => {
+            // Po dodaniu odśwież całą listę (prawidłowa paginacja i totalElements)
+            this.reloadSurveys();
           },
           error: (err) => console.error('Błąd tworzenia ankiety:', err)
         });
@@ -151,8 +184,8 @@ export class Dashboard implements OnInit {
       if (result === true) {
         this.http.delete(`${this.apiUrl}/${surveyId}`).subscribe({
           next: () => {
-            this.surveys = this.surveys.filter(s => s.id !== surveyId);
-            this.cdr.detectChanges();
+            // Po usunięciu odśwież — może zmienić się liczba stron
+            this.reloadSurveys();
           },
           error: (err) => console.error('Błąd usuwania ankiety:', err)
         });
@@ -171,30 +204,9 @@ export class Dashboard implements OnInit {
     }).catch(err => console.error('Błąd podczas kopiowania linku:', err));
   }
 
-  get processedSurveys(): SurveySummary[] {
-    const filtered = this.surveys.filter(s => {
-      const matchSearch = s.title.toLowerCase().includes(this.searchQuery.toLowerCase());
-      const matchStatus = this.filterStatus === 'all' || s.status === this.filterStatus;
-      const matchAccess = this.filterAccessType === 'all' || s.accessType === this.filterAccessType;
-      return matchSearch && matchStatus && matchAccess;
-    });
-
-    return filtered.sort((a, b) => {
-      let comp = 0;
-      if (this.sortBy === 'title') comp = a.title.localeCompare(b.title);
-      else if (this.sortBy === 'status') comp = a.status.localeCompare(b.status);
-      else if (this.sortBy === 'accessType') comp = a.accessType.localeCompare(b.accessType);
-      return this.sortDirection === 'asc' ? comp : -comp;
-    });
-  }
-
-  get paginatedSurveys(): SurveySummary[] {
-    const start = this.pageIndex * this.pageSize;
-    return this.processedSurveys.slice(start, start + this.pageSize);
-  }
-
   onPageChange(event: PageEvent) {
     this.pageIndex = event.pageIndex;
     this.pageSize = event.pageSize;
+    this.reloadSurveys();
   }
 }

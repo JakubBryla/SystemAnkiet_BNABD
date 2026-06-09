@@ -2,6 +2,7 @@ package com.systemankiet.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -42,7 +43,9 @@ public class SurveyResponse {
     @Column(name = "flag_status")
     private String flagStatus;
 
+    // @BatchSize eliminuje problem N+1: zamiast N oddzielnych zapytan laduje odpowiedzi partiami
     @OneToMany(mappedBy = "response", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 25)
     private List<ResponseAnswer> answers = new ArrayList<>();
 
     @PrePersist
