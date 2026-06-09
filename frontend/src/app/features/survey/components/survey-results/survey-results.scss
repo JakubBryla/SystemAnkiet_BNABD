@@ -1,0 +1,100 @@
+.results-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: var(--mat-sys-surface-container-lowest);
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  
+  .header-titles {
+    h1 { margin: 0; font-size: 2rem; color: var(--mat-sys-on-surface); }
+    p { margin: 8px 0 0; color: var(--mat-sys-on-surface-variant); font-size: 1.1rem; }
+  }
+  
+  /* Stylizacja przełącznika Data Cleaning */
+  .toolbar-actions {
+    background: #f5f5f5;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s ease;
+    
+    &.active-filter {
+      background: #e8f0fe;
+      border-color: #1a73e8;
+      box-shadow: 0 0 10px rgba(26, 115, 232, 0.2);
+    }
+
+    .toggle-icon {
+      vertical-align: middle;
+      margin-right: 4px;
+      font-size: 20px;
+      height: 20px;
+      width: 20px;
+      color: #1a73e8;
+    }
+  }
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 24px;
+}
+
+.chart-card {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ustalamy stałą wysokość i wymuszamy wyśrodkowanie płótna z wykresem */
+.chart-content {
+  padding: 24px;
+  height: 350px; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.text-card {
+  grid-column: 1 / -1; /* Rozciąga na całą szerokość ekranu */
+}
+
+.text-content {
+  height: auto;
+  max-height: 400px;
+  overflow-y: auto; /* Dodaje pasek przewijania przy dużej liczbie komentarzy */
+  align-items: flex-start;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.comment-bubble {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: var(--mat-sys-surface-container-low);
+  border-left: 4px solid var(--mat-sys-primary);
+  border-radius: 4px 8px 8px 4px;
+
+  .comment-icon {
+    color: var(--mat-sys-on-surface-variant);
+  }
+}

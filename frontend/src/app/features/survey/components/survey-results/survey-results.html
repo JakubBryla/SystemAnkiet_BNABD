@@ -1,0 +1,69 @@
+<div class="results-container">
+  <div class="results-header">
+    <div class="header-titles">
+      <h1>Wyniki Ankiety i Analiza</h1>
+      <p>
+        Podgląd statystyk w czasie rzeczywistym. Łączna liczba respondentów: 
+        <strong>{{ isDataCleaningEnabled ? '870 (Wiarygodnych)' : '950 (Surowych)' }}</strong>
+      </p>
+    </div>
+    
+    <div class="toolbar-actions" [class.active-filter]="isDataCleaningEnabled">
+      <mat-slide-toggle 
+        color="primary" 
+        [(ngModel)]="isDataCleaningEnabled" 
+        (change)="toggleDataCleaning()">
+        <mat-icon class="toggle-icon">filter_alt</mat-icon>
+        Algorytm Data Cleaning (Filtruj niespójne odpowiedzi)
+      </mat-slide-toggle>
+    </div>
+  </div>
+
+  <div class="charts-grid">
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>Pytanie 1: Jak oceniasz jakość usług?</mat-card-title>
+        <mat-card-subtitle>Wybór jednokrotny</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="chart-content">
+        <canvas baseChart
+          [data]="pieChartData"
+          [type]="pieChartType">
+        </canvas>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>Pytanie 2: Z jakich produktów korzystasz?</mat-card-title>
+        <mat-card-subtitle>Wybór wielokrotny</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="chart-content">
+        <canvas baseChart
+          [data]="barChartData"
+          [options]="barChartOptions"
+          [type]="barChartType">
+        </canvas>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="chart-card text-card">
+      <mat-card-header>
+        <mat-card-title>Pytanie 3: Jakieś dodatkowe uwagi?</mat-card-title>
+        <mat-card-subtitle>Odpowiedź tekstowa (Otwarta)</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="chart-content text-content">
+        <div class="comments-list">
+          @for (comment of currentTextAnswers; track comment) {
+            <div class="comment-bubble">
+              <mat-icon class="comment-icon">chat_bubble_outline</mat-icon>
+              <span>{{ comment }}</span>
+            </div>
+          } @empty {
+            <p>Brak odpowiedzi na to pytanie.</p>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

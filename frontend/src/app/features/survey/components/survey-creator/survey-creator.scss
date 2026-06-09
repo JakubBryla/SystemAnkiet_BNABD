@@ -89,3 +89,78 @@ h2 {
   display: flex;
   justify-content: flex-end; /* Wyrównanie do prawej */
 }
+
+.section-divider {
+  margin: 24px 0;
+}
+
+.access-settings-section {
+  padding: 8px 0;
+
+  .section-title {
+    margin: 0 0 4px 0;
+    font-size: 1.1rem;
+    color: var(--mat-sys-on-surface);
+  }
+
+  .section-subtitle {
+    margin: 0 0 16px 0;
+    font-size: 0.85rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.access-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  
+  mat-radio-button {
+    margin-left: -8px; /* Wyrównanie kółka do lewej krawędzi tekstu */
+  }
+}
+
+.logic-builder-section {
+  padding: 8px 0;
+}
+
+.rules-container {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.logic-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap; /* Zezwala na zawijanie do nowej linii, gdy brakuje miejsca */
+  gap: 12px;
+  background: var(--mat-sys-surface-container-lowest);
+  padding: 16px;
+  border-radius: 8px;
+  border-left: 4px solid var(--mat-sys-error);
+
+  .logic-keyword {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
+  
+  .condition-and {
+    color: var(--mat-sys-primary); /* Wyróżniamy słowo ORAZ kolorem głównym aplikacji */
+    font-size: 1rem;
+    padding: 0 8px;
+  }
+
+  .result-keyword {
+    color: var(--mat-sys-error);
+    margin-left: auto; /* Wypycha "TO ODRZUĆ" i kosz na prawą stronę */
+  }
+
+  .logic-field {
+    margin-bottom: -1.25em;
+    min-width: 180px;
+    flex-grow: 1; /* Pozwala polom rozciągać się w razie potrzeby */
+  }
+}

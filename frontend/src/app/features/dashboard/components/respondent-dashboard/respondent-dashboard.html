@@ -1,0 +1,39 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <div class="header-text">
+      <h1>Moje Ankiety</h1>
+      <p>Ankiety wewnątrzfirmowe przypisane do Twojego konta. Pamiętaj, że Twoje odpowiedzi pomagają nam się rozwijać!</p>
+    </div>
+  </div>
+
+  <div class="surveys-grid">
+    @for (survey of availableSurveys; track survey.id) {
+      <mat-card class="survey-card">
+        <mat-card-header>
+          <div class="header-content">
+            <span class="organization-label">{{ survey.organizationName }}</span>
+            <mat-card-title>{{ survey.title }}</mat-card-title>
+          </div>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <p class="survey-description">{{ survey.description }}</p>
+        </mat-card-content>
+        
+        <mat-card-actions class="card-actions">
+          <!-- Ten przycisk przenosi od razu do wypełniania -->
+          <a mat-flat-button color="primary" [routerLink]="['/s', survey.id]">
+            <mat-icon>assignment</mat-icon>
+            Wypełnij ankietę
+          </a>
+        </mat-card-actions>
+      </mat-card>
+    } @empty {
+      <div class="empty-state">
+        <mat-icon class="empty-icon">check_circle_outline</mat-icon>
+        <h2>Wszystko zrobione!</h2>
+        <p>Nie masz obecnie żadnych nowych ankiet do wypełnienia w swojej organizacji.</p>
+      </div>
+    }
+  </div>
+</div>
