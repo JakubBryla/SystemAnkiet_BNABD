@@ -7,6 +7,8 @@ import { SurveyCreator } from './features/survey/components/survey-creator/surve
 import { authGuard } from './features/auth/guards/auth-guard';
 import { RespondentDashboard } from './features/dashboard/components/respondent-dashboard/respondent-dashboard';
 import { SurveyResults } from './features/survey/components/survey-results/survey-results';
+import { AdminPanel } from './features/admin/components/admin-panel/admin-panel';
+import { adminGuard } from './features/auth/guards/admin-guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -26,11 +28,18 @@ export const routes: Routes = [
   },
   {
     path: 's/:id',
-    component: SurveyFiller
+    component: SurveyFiller,
+    canActivate: [authGuard]
   },
   {
     path: 'survey/:id/results',
-    component: SurveyResults
-  }
+    component: SurveyResults,
+    canActivate: [authGuard]
+  },
+  { 
+    path: 'admin', 
+    component: AdminPanel,
+    canActivate: [authGuard, adminGuard] 
+  },
   
 ];

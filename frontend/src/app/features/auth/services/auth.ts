@@ -14,6 +14,7 @@ export class Auth {
 
   // mock zmienna udająca stan zalogowania - w przyszłości będzie to token JWT 
   public isLoggedInSignal = signal<boolean>(false);
+  public userRoleSignal = signal<'RESPONDENT' | 'SURVEYOR' | 'ADMIN' | null>(null);
 
   isLoggedIn(): boolean {
     // w przyszłości będziemy tu sprawdzany prawdziwy token JWT z przeglądarki
@@ -24,9 +25,11 @@ export class Auth {
     console.log('AuthService (Logowanie): Wysyłam dane do', this.apiUrl + '/login');
     // odkomentować to w przyszłości:
     // return this.http.post(`${this.apiUrl}/login`, credentials);
-
+    
     // symulacja udanego logowania - w przyszłości usuniemy ten kod i będziemy polegać na odpowiedzi z backendu
+     // symulacja roli użytkownika - w rzeczywistości ta informacja będzie pochodzić z tokenu JWT
     this.isLoggedInSignal.set(true); 
+    this.userRoleSignal.set('ADMIN');
     this.router.navigate(['/dashboard']);
   }
 
@@ -35,6 +38,7 @@ export class Auth {
     // w przyszłości usunąć token JWT z localStorage
     // localStorage.removeItem('token');
     this.isLoggedInSignal.set(false);
+    this.userRoleSignal.set(null);
     this.router.navigate(['/login']);
   }
 

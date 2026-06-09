@@ -1,0 +1,121 @@
+.admin-wrapper {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.admin-header {
+  margin-bottom: 32px;
+  h1 { margin: 0; font-size: 2rem; color: var(--mat-sys-on-surface); }
+  p { margin: 8px 0 0; color: var(--mat-sys-on-surface-variant); }
+}
+
+.users-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.user-row {
+  border-radius: 12px;
+  
+  .row-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 16px 24px;
+  }
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 2;
+  min-width: 250px;
+
+  .avatar {
+    width: 48px;
+    height: 48px;
+    background: var(--mat-sys-surface-variant);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  .details {
+    display: flex;
+    flex-direction: column;
+    
+    .name { font-weight: 500; font-size: 1.1rem; color: var(--mat-sys-on-surface); }
+    .email { font-size: 0.9rem; color: var(--mat-sys-on-surface-variant); }
+  }
+}
+
+.user-role {
+  flex: 1;
+  min-width: 150px;
+}
+
+.user-actions {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  min-width: 200px;
+}
+
+/* Kolory Ról */
+.role-chip {
+  font-weight: 500;
+  
+  &.respondent {
+    background-color: #f5f5f5 !important;
+    color: #616161 !important;
+  }
+  &.surveyor {
+    background-color: #e8f0fe !important;
+    color: #1a73e8 !important;
+  }
+  &.admin {
+    background-color: #fce8e6 !important;
+    color: #c5221f !important;
+  }
+}
+
+filters-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 32px;
+  background: var(--mat-sys-surface-container-lowest);
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+
+  .filter-search { flex-grow: 1; min-width: 250px; }
+  .filter-select { min-width: 180px; }
+  .sort-group { display: flex; align-items: center; gap: 8px; }
+  .sort-dir-btn { margin-top: -16px; }
+  mat-form-field { margin-bottom: -1.25em; }
+}
+
+.custom-paginator {
+  margin-top: 24px;
+  background: transparent;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px;
+  background: var(--mat-sys-surface-container-lowest);
+  border-radius: 12px;
+  color: var(--mat-sys-on-surface-variant);
+  
+  h3 { margin: 8px 0; color: var(--mat-sys-on-surface); }
+  p { margin: 0; }
+}
