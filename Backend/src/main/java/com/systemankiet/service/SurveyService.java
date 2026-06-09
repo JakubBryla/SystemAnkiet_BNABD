@@ -94,7 +94,8 @@ public class SurveyService {
 
     @Transactional(readOnly = true)
     public SurveyDetailDto getPublicSurvey(Long id) {
-        Survey survey = surveyRepository.findByIdAndStatus(id, SurveyStatus.ACTIVE)
+        // Zwraca ankietę niezależnie od statusu - frontend sam obsługuje stany draft/closed/active
+        Survey survey = surveyRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Ankieta nie znaleziona"));
         return SurveyDetailDto.fromEntity(survey);
     }
