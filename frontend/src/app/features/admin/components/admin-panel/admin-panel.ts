@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectorRef } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
@@ -16,8 +16,10 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 export interface User {
   id: number;
   email: string;
+  firstName: string | null;
+  lastName: string | null;
   role: 'USER' | 'ADMIN';
-  domain: string;
+  domain: string | null;
   active: boolean;
 }
 
@@ -44,6 +46,7 @@ export interface User {
 export class AdminPanel implements OnInit {
   private http = inject(HttpClient);
   private snackBar = inject(MatSnackBar);
+  private cdr = inject(ChangeDetectorRef);
 
   private apiUrl = 'http://localhost:8080/api/users';
 
@@ -54,7 +57,7 @@ export class AdminPanel implements OnInit {
   // --- STANY FILTRÓW I PAGINACJI ---
   searchQuery = '';
   filterRole: 'all' | 'USER' | 'ADMIN' = 'all';
-  sortBy: 'email' | 'role' | 'domain' = 'email';
+  sortBy: 'name' | 'email' | 'role' | 'domain' = 'email';
   sortDirection: 'asc' | 'desc' = 'asc';
 
   pageIndex = 0;
@@ -72,32 +75,45 @@ export class AdminPanel implements OnInit {
       next: (users) => {
         this.users.set(users);
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.isLoading = false;
         this.errorMessage = 'Nie można załadować listy użytkowników.';
+        this.cdr.detectChanges();
       }
     });
   }
 
+  /** Zwraca czytelną nazwę użytkownika: imię + nazwisko lub sam email */
+  displayName(user: User): string {
+    const fn = user.firstName?.trim() ?? '';
+    const ln = user.lastName?.trim() ?? '';
+    return (fn || ln) ? `${fn} ${ln}`.trim() : user.email;
+  }
+
   // --- PRZETWARZANIE DANYCH ---
   get processedUsers() {
+    const q = this.searchQuery.toLowerCase();
     const filtered = this.users().filter(u => {
-      const matchSearch =
-        u.email.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        u.domain.toLowerCase().includes(this.searchQuery.toLowerCase());
+      const name = this.displayName(u).toLowerCase();
+      const matchSearch = name.includes(q) ||
+        u.email.toLowerCase().includes(q) ||
+        (u.domain ?? '').toLowerCase().includes(q);
       const matchRole = this.filterRole === 'all' || u.role === this.filterRole;
       return matchSearch && matchRole;
     });
 
     return [...filtered].sort((a, b) => {
       let comp = 0;
-      if (this.sortBy === 'email') {
-        comp = a.email.localeCompare(b.email);
+      if (this.sortBy === 'name') {
+        comp = this.displayName(a).localeCompare(this.displayName(b));
+      } else if (this.sortBy === 'email') {
+        comp = (a.email ?? '').localeCompare(b.email ?? '');
       } else if (this.sortBy === 'role') {
-        comp = a.role.localeCompare(b.role);
+        comp = (a.role ?? '').localeCompare(b.role ?? '');
       } else if (this.sortBy === 'domain') {
-        comp = a.domain.localeCompare(b.domain);
+        comp = (a.domain ?? '').localeCompare(b.domain ?? '');
       }
       return this.sortDirection === 'asc' ? comp : -comp;
     });
@@ -120,8 +136,8 @@ export class AdminPanel implements OnInit {
         this.users.update(list => list.map(u => u.id === userId ? updated : u));
         const label = updated.role === 'ADMIN' ? 'Administrator' : 'Użytkownik';
         this.snackBar.open(`Rola zmieniona na: ${label}`, 'OK', { duration: 3000 });
+        this.cdr.detectChanges();
 
-        // Korekta paginacji jeśli lista się skurczyła
         const maxPage = Math.max(0, Math.ceil(this.processedUsers.length / this.pageSize) - 1);
         if (this.pageIndex > maxPage) {
           this.pageIndex = maxPage;

@@ -23,7 +23,7 @@
       <mat-form-field appearance="outline" class="filter-search">
         <mat-label>Wyszukaj użytkownika...</mat-label>
         <mat-icon matPrefix>search</mat-icon>
-        <input matInput [(ngModel)]="searchQuery" (ngModelChange)="pageIndex = 0" placeholder="E-mail lub domena">
+        <input matInput [(ngModel)]="searchQuery" (ngModelChange)="pageIndex = 0" placeholder="Imię, nazwisko, e-mail lub domena">
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="filter-select">
@@ -39,6 +39,7 @@
         <mat-form-field appearance="outline" class="filter-select">
           <mat-label>Sortuj według</mat-label>
           <mat-select [(ngModel)]="sortBy" (ngModelChange)="pageIndex = 0">
+            <mat-option value="name">Nazwy</mat-option>
             <mat-option value="email">Adresu E-mail</mat-option>
             <mat-option value="domain">Domeny</mat-option>
             <mat-option value="role">Roli</mat-option>
@@ -61,8 +62,15 @@
                 <mat-icon>{{ user.role === 'ADMIN' ? 'admin_panel_settings' : 'person' }}</mat-icon>
               </div>
               <div class="details">
-                <span class="name">{{ user.email }}</span>
-                <span class="email">Domena: {{ user.domain }}</span>
+                @if (user.firstName || user.lastName) {
+                  <span class="name">{{ user.firstName }} {{ user.lastName }}</span>
+                  <span class="email">{{ user.email }}</span>
+                } @else {
+                  <span class="name">{{ user.email }}</span>
+                  @if (user.domain) {
+                    <span class="email">Domena: {{ user.domain }}</span>
+                  }
+                }
               </div>
             </div>
 
