@@ -39,7 +39,15 @@ export class Auth {
         localStorage.setItem('email', response.email);
         localStorage.setItem('role', response.role);
         this.isLoggedInSignal.set(true);
-        this.router.navigate(['/dashboard']);
+
+        // Jeśli użytkownik był przekierowany z ankiety — wróć do niej
+        const returnUrl = sessionStorage.getItem('loginReturnUrl');
+        if (returnUrl) {
+          sessionStorage.removeItem('loginReturnUrl');
+          this.router.navigateByUrl(returnUrl);
+        } else {
+          this.router.navigate(['/dashboard']);
+        }
       })
     );
   }

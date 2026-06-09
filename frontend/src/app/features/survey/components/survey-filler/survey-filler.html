@@ -8,6 +8,24 @@
       </div>
     }
 
+    @case ('login-required') {
+      <mat-card class="message-card">
+        <mat-card-header>
+          <div mat-card-avatar><mat-icon color="primary">lock_person</mat-icon></div>
+          <mat-card-title>Ankieta wewnętrzna</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Ta ankieta jest dostępna wyłącznie dla zalogowanych pracowników organizacji. Zaloguj się, aby kontynuować.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-flat-button color="primary" (click)="goToLogin()">
+            <mat-icon>login</mat-icon>
+            Przejdź do logowania
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    }
+
     @case ('closed') {
       <mat-card class="message-card">
         <mat-card-header>
