@@ -23,6 +23,8 @@ export interface Question {
   type: 'short-answer' | 'single-choice' | 'multiple-choice';
   options: string[];
   isRequired: boolean;
+  isControlQuestion?: boolean;
+  expectedValue?: string;
 }
 
 export interface Survey {

@@ -10,6 +10,11 @@ import { RouterModule } from '@angular/router';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CreateSurveyDialog } from '../create-survey-dialog/create-survey-dialog';
 import { DeleteSurveyDialog } from '../delete-survey-dialog/delete-survey-dialog';
+import { FormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 
 export interface SurveySummary {
   id: number;
@@ -17,7 +22,6 @@ export interface SurveySummary {
   description: string;
   status: 'draft' | 'active' | 'closed';
   accessType: 'INTERNAL' | 'EXTERNAL'; 
-  organizationName?: string;
 }
 
 @Component({
@@ -30,7 +34,12 @@ export interface SurveySummary {
     MatChipsModule,
     RouterModule,
     NgClass,
-    MatSnackBarModule
+    MatSnackBarModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatPaginatorModule
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
@@ -46,24 +55,21 @@ export class Dashboard {
       title: 'Satysfakcja z pakietu medycznego 2026', 
       description: 'Badanie wewnętrzne dla pracowników pionu logistyki.', 
       status: 'draft',
-      accessType: 'INTERNAL',
-      organizationName: 'ORLEN S.A.'
+      accessType: 'INTERNAL'
     },
     { 
       id: 2, 
       title: 'Opinia o paliwach VERVA i Stop Cafe', 
       description: 'Ogólnopolskie badanie opinii konsumentów i kierowców.', 
       status: 'active',
-      accessType: 'EXTERNAL',
-      organizationName: 'ORLEN S.A.'
+      accessType: 'EXTERNAL'
     },
     { 
       id: 3, 
       title: 'Badanie komunikacji wewnętrznej', 
       description: 'Ankieta oceniająca nowy intranet firmowy.', 
       status: 'closed',
-      accessType: 'INTERNAL',
-      organizationName: 'ORLEN S.A.'
+      accessType: 'INTERNAL'
     }
   ];
 
@@ -94,8 +100,7 @@ export class Dashboard {
             title: result,
             description: '',
             status: 'draft',
-            accessType: 'EXTERNAL', 
-            organizationName: 'ORLEN S.A.' 
+            accessType: 'EXTERNAL'
           }
         ];
         this.cdr.detectChanges();
@@ -138,5 +143,49 @@ export class Dashboard {
     }).catch(err => {
       console.error('Błąd podczas kopiowania linku: ', err);
     });
+  }
+
+  searchQuery = '';
+  sortBy: 'title' | 'status' | 'accessType' = 'title';
+  sortDirection: 'asc' | 'desc' = 'asc';
+  filterStatus: 'all' | 'draft' | 'active' | 'closed' = 'all';
+  filterAccessType: 'all' | 'INTERNAL' | 'EXTERNAL' = 'all';
+  pageSize = 6;
+  pageIndex = 0;
+
+  get processedSurveys() {
+    // Filtrowanie
+    const result = this.surveys.filter(s => {
+      const matchSearch = s.title.toLowerCase().includes(this.searchQuery.toLowerCase());
+      const matchStatus = this.filterStatus === 'all' || s.status === this.filterStatus;
+      const matchAccess = this.filterAccessType === 'all' || s.accessType === this.filterAccessType;
+      
+      return matchSearch && matchStatus && matchAccess;
+    });
+
+    // Sortowanie
+    [...result].sort((a, b) => {
+      let comp = 0;
+      if (this.sortBy === 'title') {
+        comp = a.title.localeCompare(b.title);
+      } else if (this.sortBy === 'status') {
+        comp = a.status.localeCompare(b.status);
+      } else if (this.sortBy === 'accessType') {
+        comp = a.accessType.localeCompare(b.accessType);
+      }
+      return this.sortDirection === 'asc' ? comp : -comp;
+    });
+
+    return result;
+  }
+
+  get paginatedSurveys() {
+    const start = this.pageIndex * this.pageSize;
+    return this.processedSurveys.slice(start, start + this.pageSize);
+  }
+
+  onPageChange(event: PageEvent) {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
   }
 }

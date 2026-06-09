@@ -74,3 +74,18 @@ mat-card-content {
   h2 { margin: 0; color: var(--mat-sys-on-surface); }
   p { color: var(--mat-sys-on-surface-variant); }
 }
+
+.toolbar {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+
+  .search-field { flex-grow: 1; }
+  .sort-field { min-width: 200px; }
+  mat-form-field { margin-bottom: -1.25em; }
+}
+.custom-paginator {
+  margin-top: 24px;
+  background: transparent;
+}

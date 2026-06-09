@@ -123,3 +123,26 @@
     color: #8e24aa !important; 
   }
 }
+
+.filters-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 32px;
+  background: var(--mat-sys-surface-container-lowest);
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+
+  .filter-search { flex-grow: 1; min-width: 250px; }
+  .filter-select { min-width: 180px; }
+  .sort-group { display: flex; align-items: center; gap: 8px; }
+  .sort-dir-btn { margin-top: -16px; }
+  mat-form-field { margin-bottom: -1.25em; }
+}
+
+.custom-paginator {
+  margin-top: 24px;
+  background: transparent;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+}
