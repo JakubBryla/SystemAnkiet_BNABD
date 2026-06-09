@@ -95,6 +95,12 @@
           
         }
 
+        @if (errorMessage) {
+          <div class="error-banner" style="color: red; margin: 8px 0; padding: 8px; border: 1px solid red; border-radius: 4px;">
+            ⚠️ {{ errorMessage }}
+          </div>
+        }
+
         <div class="submit-action">
           <button mat-flat-button color="primary" type="submit" [disabled]="answersForm.invalid" class="submit-btn">
             Wyślij odpowiedzi
@@ -105,9 +111,19 @@
     }
 
     @default {
-      <div class="message-card">
-        <h2>404 - Nie znaleziono ankiety</h2>
-      </div>
+      <mat-card class="message-card">
+        <mat-card-header>
+          <div mat-card-avatar><mat-icon color="warn">error_outline</mat-icon></div>
+          <mat-card-title>Nie znaleziono ankiety</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          @if (errorMessage) {
+            <p>{{ errorMessage }}</p>
+          } @else {
+            <p>Ankieta o podanym adresie nie istnieje lub została usunięta.</p>
+          }
+        </mat-card-content>
+      </mat-card>
     }
   }
 

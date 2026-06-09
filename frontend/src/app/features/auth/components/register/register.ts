@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -11,7 +11,7 @@ import { Auth } from '../../services/auth';
 export function passwordsMatchValidator(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
   const confirmPassword = control.get('confirmPassword')?.value;
-  
+
   return password === confirmPassword ? null : { passwordsMismatch: true };
 }
 
@@ -23,6 +23,7 @@ export function passwordsMatchValidator(control: AbstractControl): ValidationErr
 })
 export class Register {
   private auth = inject(Auth);
+  private router = inject(Router);
 
   registerForm = new FormGroup({
     firstName: new FormControl('', [Validators.required]),
@@ -30,33 +31,34 @@ export class Register {
     email: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', [Validators.required, Validators.minLength(8)]),
     confirmPassword: new FormControl('', [Validators.required])
-  }, { validators: passwordsMatchValidator }); 
+  }, { validators: passwordsMatchValidator });
 
   serverError = signal<string | null>(null);
+  isLoading = signal<boolean>(false);
 
   onSubmit() {
-    if (this.registerForm.valid) {
-      this.serverError.set(null); // Czyszczenie błędów przed wysłaniem
-      const userData = {
-        firstName: this.registerForm.value.firstName,
-        lastName: this.registerForm.value.lastName,
-        email: this.registerForm.value.email,
-        password: this.registerForm.value.password
-      };
+    if (this.registerForm.invalid) return;
 
-      // --- SYMULACJA WALIDACJI DOMENY ---
-      // Docelowo ten błąd wyrzuci backend, my go tylko przechwycimy.
-      // Teraz symulujemy to na frontendzie, zakładając, że dozwolona domena to "nazwafirmy.pl"
-      const email = userData.email || '';
-      const domain = email.split('@')[1];
+    this.serverError.set(null);
+    this.isLoading.set(true);
 
-      if (domain !== 'nazwafirmy.pl') {
-        this.serverError.set('Rejestracja dozwolona tylko dla autoryzowanych domen firmowych (np. @nazwafirmy.pl).');
-        return;
+    const userData = {
+      firstName: this.registerForm.value.firstName,
+      lastName: this.registerForm.value.lastName,
+      email: this.registerForm.value.email,
+      password: this.registerForm.value.password
+    };
+
+    this.auth.register(userData).subscribe({
+      next: () => {
+        this.isLoading.set(false);
+        this.router.navigate(['/login']);
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        const msg = err.error?.error || 'Błąd rejestracji. Spróbuj ponownie.';
+        this.serverError.set(msg);
       }
-      // ----------------------------------
-
-      this.auth.register(userData);
-    }
+    });
   }
 }

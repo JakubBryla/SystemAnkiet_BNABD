@@ -133,13 +133,19 @@
       }
     </div>
 
+    @if (saveError) {
+      <div style="color: red; margin: 8px 0; padding: 8px; border: 1px solid red; border-radius: 4px;">
+        ⚠️ {{ saveError }}
+      </div>
+    }
+
     <div class="actions">
       <button mat-flat-button color="accent" type="button" (click)="addQuestion()">
         <mat-icon>add</mat-icon> Dodaj kolejne pytanie
       </button>
-      
-      <button mat-flat-button color="primary" type="submit" [disabled]="surveyForm.invalid">
-        Zapisz ankietę
+
+      <button mat-flat-button color="primary" type="submit" [disabled]="surveyForm.invalid || isSaving">
+        {{ isSaving ? 'Zapisywanie...' : 'Zapisz ankietę' }}
       </button>
     </div>
 

@@ -13,7 +13,8 @@ function isTrustedApiUrl(url: string): boolean {
 
     // For absolute URLs, check the host
     const requestUrl = new URL(url);
-    return TRUSTED_API_HOSTS.some(trustedHost => requestUrl.host === trustedHost);
+    // hostname nie zawiera portu (np. "localhost"), host zawiera port ("localhost:8080")
+    return TRUSTED_API_HOSTS.some(trustedHost => requestUrl.hostname === trustedHost);
   } catch {
     // If URL parsing fails, assume it's not trusted
     return false;
