@@ -127,12 +127,50 @@
   </div>
 
   @if (processedSurveys.length > 0) {
-    <mat-paginator 
+    <mat-paginator
       [length]="processedSurveys.length"
       [pageSize]="pageSize"
       [pageSizeOptions]="[3, 6, 12, 24]"
       (page)="onPageChange($event)"
       class="custom-paginator">
     </mat-paginator>
+  }
+
+  @if (assignedSurveys.length > 0) {
+    <div class="dashboard-header" style="margin-top: 40px;">
+      <h2>Ankiety do wypełnienia</h2>
+      <p style="margin: 0; color: #666; font-size: 14px;">Wewnętrzne ankiety Twojej organizacji</p>
+    </div>
+
+    <div class="cards-grid">
+      @for (survey of assignedSurveys; track survey.id) {
+        <mat-card class="survey-card">
+          <mat-card-header>
+            <div class="header-content">
+              <mat-card-title>{{ survey.title }}</mat-card-title>
+              <div class="chips-container">
+                <mat-chip class="status-chip" [ngClass]="survey.status">
+                  @if (survey.status === 'active') { Aktywna }
+                  @if (survey.status === 'closed') { Zamknięta }
+                </mat-chip>
+              </div>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content>
+            <p>{{ survey.description }}</p>
+          </mat-card-content>
+
+          <mat-card-actions class="card-actions">
+            <button mat-flat-button color="primary"
+              [routerLink]="['/s', survey.id]"
+              [disabled]="survey.status !== 'active'">
+              <mat-icon>edit</mat-icon>
+              Wypełnij
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
   }
 </div>
