@@ -11,6 +11,8 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatDividerModule } from '@angular/material/divider';
+import { FormsModule } from '@angular/forms';
+
 
 export function atLeastOneQuestion(control: AbstractControl): ValidationErrors | null {
   return control.value && control.value.length > 0 ? null : { requireQuestion: true };
@@ -27,6 +29,13 @@ export const optionsValidator: ValidatorFn = (control: AbstractControl): Validat
   return null;
 };
 
+export interface CleaningRule {
+  firstQuestion: string;
+  firstAnswer: string;
+  secondQuestion: string;
+  secondAnswer: string;
+}
+
 @Component({
   selector: 'app-survey-creator',
   imports: [
@@ -39,7 +48,8 @@ export const optionsValidator: ValidatorFn = (control: AbstractControl): Validat
     MatSlideToggleModule,
     ReactiveFormsModule,
     MatRadioModule,
-    MatDividerModule
+    MatDividerModule,
+    FormsModule
   ],
   templateUrl: './survey-creator.html',
   styleUrl: './survey-creator.scss',
@@ -117,5 +127,20 @@ export class SurveyCreator implements OnInit {
       
       this.router.navigate(['/dashboard']);
     }
+  }
+
+  cleaningRules: CleaningRule[] = [];
+
+  addCleaningRule() {
+    this.cleaningRules.push({
+      firstQuestion: '',
+      firstAnswer: '',
+      secondQuestion: '',
+      secondAnswer: ''
+    });
+  }
+
+  removeCleaningRule(index: number) {
+    this.cleaningRules.splice(index, 1);
   }
 }

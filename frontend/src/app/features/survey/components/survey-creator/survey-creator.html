@@ -9,6 +9,11 @@
           <mat-label>Tytuł ankiety</mat-label>
           <input matInput formControlName="title" placeholder="np. Badanie zadowolenia">
         </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Opis ankiety (opcjonalny)</mat-label>
+          <textarea matInput formControlName="description" rows="2"></textarea>
+        </mat-form-field>
         
         <mat-divider class="section-divider"></mat-divider>
 
@@ -28,10 +33,67 @@
 
         <mat-divider class="section-divider"></mat-divider>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Opis ankiety (opcjonalny)</mat-label>
-          <textarea matInput formControlName="description" rows="2"></textarea>
-        </mat-form-field>
+        <div class="logic-builder-section">
+          <h3 class="section-title">Algorytm Data Cleaning (Reguły spójności)</h3>
+          <p class="section-subtitle">Zdefiniuj warunki, które automatycznie oflagują odpowiedzi respondenta jako niewiarygodne.</p>
+
+          <button mat-stroked-button color="primary" type="button" (click)="addCleaningRule()">
+            <mat-icon>add</mat-icon> Dodaj regułę wykluczającą
+          </button>
+
+          <div class="rules-container">
+            @for (rule of cleaningRules; track $index) {
+              <div class="logic-row">
+                <span class="logic-keyword">JEŻELI</span>
+                
+                <mat-form-field appearance="outline" class="logic-field">
+                  <mat-label>Wybierz pytanie</mat-label>
+                  <mat-select [(ngModel)]="rule.firstQuestion" [ngModelOptions]="{standalone: true}">
+                    <mat-option value="q1">Pytanie 1: Czy masz prawo jazdy?</mat-option>
+                    <mat-option value="q2">Pytanie 2: Jaką kawę pijesz?</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <span class="logic-keyword">=</span>
+
+                <mat-form-field appearance="outline" class="logic-field">
+                  <mat-label>Odpowiedź</mat-label>
+                  <mat-select [(ngModel)]="rule.firstAnswer" [ngModelOptions]="{standalone: true}">
+                    <mat-option value="a1">Nie mam</mat-option>
+                    <mat-option value="a2">Mam</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <span class="logic-keyword condition-and">ORAZ</span>
+
+                <mat-form-field appearance="outline" class="logic-field">
+                  <mat-label>Wybierz pytanie</mat-label>
+                  <mat-select [(ngModel)]="rule.secondQuestion" [ngModelOptions]="{standalone: true}">
+                    <mat-option value="q5">Pytanie 5: Czym dojeżdżasz do pracy?</mat-option>
+                    <mat-option value="q6">Pytanie 6: Ulubiony napój?</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <span class="logic-keyword">=</span>
+
+                <mat-form-field appearance="outline" class="logic-field">
+                  <mat-label>Odpowiedź</mat-label>
+                  <mat-select [(ngModel)]="rule.secondAnswer" [ngModelOptions]="{standalone: true}">
+                    <mat-option value="a5">Samochodem jako kierowca</mat-option>
+                    <mat-option value="a6">Piję tylko herbatę</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <span class="logic-keyword result-keyword">TO ODRZUĆ</span>
+
+                <button mat-icon-button color="warn" type="button" (click)="removeCleaningRule($index)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+
       </mat-card-content>
     </mat-card>
 
