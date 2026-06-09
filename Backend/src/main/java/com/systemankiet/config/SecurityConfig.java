@@ -39,6 +39,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/surveys/*/public").permitAll()
+                .requestMatchers("/api/surveys/*/responses").permitAll()  // EXTERNAL - bez logowania
+                .requestMatchers("/api/organizations").permitAll()         // lista organizacji - publiczna
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
