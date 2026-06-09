@@ -40,6 +40,11 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private boolean active;
 
+    // Organizacja do której należy użytkownik (opcjonalna)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id")
+    private Organization organization;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

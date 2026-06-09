@@ -1,6 +1,7 @@
 package com.systemankiet.entity;
 
 import com.systemankiet.enums.SurveyStatus;
+import com.systemankiet.enums.SurveyType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,6 +29,12 @@ public class Survey {
     @Enumerated(EnumType.STRING)
     private SurveyStatus status;
 
+    // EXTERNAL - link publiczny, każdy może wypełnić bez logowania
+    // INTERNAL - tylko zalogowani użytkownicy tej samej organizacji
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private SurveyType type;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -44,6 +51,9 @@ public class Survey {
         createdAt = LocalDateTime.now();
         if (status == null) {
             status = SurveyStatus.DRAFT;
+        }
+        if (type == null) {
+            type = SurveyType.EXTERNAL;
         }
     }
 }
