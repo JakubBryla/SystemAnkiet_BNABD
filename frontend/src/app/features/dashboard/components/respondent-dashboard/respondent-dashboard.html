@@ -6,56 +6,78 @@
     </div>
   </div>
 
-  <div class="toolbar">
-    <mat-form-field appearance="outline" class="search-field">
-      <mat-label>Szukaj ankiety</mat-label>
-      <mat-icon matPrefix>search</mat-icon>
-      <input matInput [(ngModel)]="searchQuery" (ngModelChange)="pageIndex = 0" placeholder="Wpisz nazwę...">
-    </mat-form-field>
+  @if (isLoading) {
+    <div style="display: flex; justify-content: center; padding: 48px;">
+      <mat-spinner></mat-spinner>
+    </div>
+  } @else if (errorMessage) {
+    <mat-card style="margin: 24px auto; max-width: 500px; text-align: center;">
+      <mat-card-content>
+        <mat-icon color="warn" style="font-size: 40px; width: 40px; height: 40px;">error_outline</mat-icon>
+        <p>{{ errorMessage }}</p>
+      </mat-card-content>
+    </mat-card>
+  } @else {
 
-    <mat-form-field appearance="outline" class="sort-field">
-      <mat-label>Sortuj po nazwie</mat-label>
-      <mat-select [(ngModel)]="sortDirection" (ngModelChange)="pageIndex = 0">
-        <mat-option value="asc">A - Z</mat-option>
-        <mat-option value="desc">Z - A</mat-option>
-      </mat-select>
-    </mat-form-field>
-  </div>
+    <div class="toolbar">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Szukaj ankiety</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput [(ngModel)]="searchQuery" (ngModelChange)="pageIndex = 0" placeholder="Wpisz nazwę...">
+      </mat-form-field>
 
-  <div class="surveys-grid">
-    @for (survey of paginatedSurveys; track survey.id) {
-      <mat-card class="survey-card">
-        <mat-card-header>
-          <div class="header-content">
-            <span class="organization-label">{{ survey.organizationName }}</span>
-            <mat-card-title>{{ survey.title }}</mat-card-title>
-          </div>
-        </mat-card-header>
-        <mat-card-content>
-          <p class="survey-description">{{ survey.description }}</p>
-        </mat-card-content>
-        <mat-card-actions class="card-actions">
-          <a mat-flat-button color="primary" [routerLink]="['/s', survey.id]">
-            <mat-icon>assignment</mat-icon> Wypełnij
-          </a>
-        </mat-card-actions>
-      </mat-card>
-    } @empty {
-      <div class="empty-state">
-        <mat-icon class="empty-icon">search_off</mat-icon>
-        <h2>Brak wyników</h2>
-        <p>Nie znaleźliśmy ankiet pasujących do kryteriów.</p>
-      </div>
+      <mat-form-field appearance="outline" class="sort-field">
+        <mat-label>Sortuj po nazwie</mat-label>
+        <mat-select [(ngModel)]="sortDirection" (ngModelChange)="pageIndex = 0">
+          <mat-option value="asc">A - Z</mat-option>
+          <mat-option value="desc">Z - A</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="surveys-grid">
+      @for (survey of paginatedSurveys; track survey.id) {
+        <mat-card class="survey-card">
+          <mat-card-header>
+            <div class="header-content">
+              <mat-card-title>{{ survey.title }}</mat-card-title>
+              <mat-chip class="status-chip" [ngClass]="survey.status">
+                @if (survey.status === 'active') { Aktywna }
+                @if (survey.status === 'closed') { Zamknięta }
+                @if (survey.status === 'draft') { Szkic }
+              </mat-chip>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="survey-description">{{ survey.description }}</p>
+          </mat-card-content>
+          <mat-card-actions class="card-actions">
+            <a mat-flat-button color="primary"
+               [routerLink]="['/s', survey.id]"
+               [attr.disabled]="survey.status !== 'active' ? true : null">
+              <mat-icon>assignment</mat-icon>
+              Wypełnij
+            </a>
+          </mat-card-actions>
+        </mat-card>
+      } @empty {
+        <div class="empty-state">
+          <mat-icon class="empty-icon">search_off</mat-icon>
+          <h2>Brak wyników</h2>
+          <p>Nie znaleźliśmy ankiet pasujących do kryteriów.</p>
+        </div>
+      }
+    </div>
+
+    @if (processedSurveys.length > 0) {
+      <mat-paginator
+        [length]="processedSurveys.length"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[3, 6, 12]"
+        (page)="onPageChange($event)"
+        class="custom-paginator">
+      </mat-paginator>
     }
-  </div>
 
-  @if (processedSurveys.length > 0) {
-    <mat-paginator 
-      [length]="processedSurveys.length"
-      [pageSize]="pageSize"
-      [pageSizeOptions]="[3, 6, 12]"
-      (page)="onPageChange($event)"
-      class="custom-paginator">
-    </mat-paginator>
   }
 </div>

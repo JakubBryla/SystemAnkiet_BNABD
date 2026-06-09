@@ -20,7 +20,7 @@ export const routes: Routes = [
     component: Dashboard,
     canActivate: [authGuard] 
   },
-  { path: 'my-surveys', component: RespondentDashboard },
+  { path: 'my-surveys', component: RespondentDashboard, canActivate: [authGuard] },
   { 
     path: 'survey/:id/edit', 
     component: SurveyCreator,
