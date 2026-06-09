@@ -15,4 +15,6 @@ public interface SurveyResponseRepository extends JpaRepository<SurveyResponse, 
     boolean existsBySurvey(Survey survey);
 
     long countBySurvey(Survey survey);
+
+    void deleteAllBySurvey(Survey survey);
 }

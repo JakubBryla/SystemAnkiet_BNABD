@@ -116,6 +116,11 @@ public class SurveyService {
     public void deleteSurvey(Long id, User user) {
         Survey survey = surveyRepository.findByIdAndCreatedBy(id, user)
                 .orElseThrow(() -> new NoSuchElementException("Ankieta nie znaleziona lub brak uprawnien"));
+
+        // Najpierw usuń odpowiedzi (kaskadowo usuwa response_answers przez CascadeType.ALL).
+        // Bez tego SQL Server blokuje usunięcie questions przez FK response_answers.question_id.
+        responseRepository.deleteAllBySurvey(survey);
+
         surveyRepository.delete(survey);
     }
 
