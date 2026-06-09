@@ -18,7 +18,7 @@ export interface User {
   email: string;
   firstName: string | null;
   lastName: string | null;
-  role: 'USER' | 'ANKIETER' | 'ADMIN';
+  role: 'USER' | 'SURVEYOR' | 'ADMIN';
   domain: string | null;
   active: boolean;
 }
@@ -56,7 +56,7 @@ export class AdminPanel implements OnInit {
 
   // --- STANY FILTRÓW I PAGINACJI ---
   searchQuery = '';
-  filterRole: 'all' | 'USER' | 'ANKIETER' | 'ADMIN' = 'all';
+  filterRole: 'all' | 'USER' | 'SURVEYOR' | 'ADMIN' = 'all';
   sortBy: 'name' | 'email' | 'role' | 'domain' = 'email';
   sortDirection: 'asc' | 'desc' = 'asc';
 
@@ -93,9 +93,9 @@ export class AdminPanel implements OnInit {
   }
 
   /** Czytelna etykieta roli */
-  roleLabel(role: 'USER' | 'ANKIETER' | 'ADMIN'): string {
+  roleLabel(role: 'USER' | 'SURVEYOR' | 'ADMIN'): string {
     if (role === 'ADMIN') return 'Administrator';
-    if (role === 'ANKIETER') return 'Ankieter';
+    if (role === 'SURVEYOR') return 'Ankieter';
     return 'Użytkownik';
   }
 
@@ -137,7 +137,7 @@ export class AdminPanel implements OnInit {
   }
 
   // --- AKCJE ---
-  setRole(userId: number, newRole: 'USER' | 'ANKIETER' | 'ADMIN') {
+  setRole(userId: number, newRole: 'USER' | 'SURVEYOR' | 'ADMIN') {
     this.http.patch<User>(`${this.apiUrl}/${userId}/role`, { role: newRole }).subscribe({
       next: (updated) => {
         this.users.update(list => list.map(u => u.id === userId ? updated : u));

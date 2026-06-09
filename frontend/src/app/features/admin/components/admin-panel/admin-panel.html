@@ -31,7 +31,7 @@
         <mat-select [(ngModel)]="filterRole" (ngModelChange)="pageIndex = 0">
           <mat-option value="all">Wszyscy</mat-option>
           <mat-option value="ADMIN">Administratorzy</mat-option>
-          <mat-option value="ANKIETER">Ankieterzy</mat-option>
+          <mat-option value="SURVEYOR">Ankieterzy</mat-option>
           <mat-option value="USER">Użytkownicy</mat-option>
         </mat-select>
       </mat-form-field>
@@ -61,7 +61,7 @@
             <div class="user-info">
               <div class="avatar">
                 <mat-icon>
-                  {{ user.role === 'ADMIN' ? 'admin_panel_settings' : user.role === 'ANKIETER' ? 'assignment_ind' : 'person' }}
+                  {{ user.role === 'ADMIN' ? 'admin_panel_settings' : user.role === 'SURVEYOR' ? 'assignment_ind' : 'person' }}
                 </mat-icon>
               </div>
               <div class="details">
@@ -80,7 +80,7 @@
             <div class="user-role">
               <mat-chip class="role-chip" [ngClass]="user.role.toLowerCase()">
                 @if (user.role === 'ADMIN') { Administrator }
-                @if (user.role === 'ANKIETER') { Ankieter }
+                @if (user.role === 'SURVEYOR') { Ankieter }
                 @if (user.role === 'USER') { Użytkownik }
               </mat-chip>
             </div>
@@ -90,7 +90,7 @@
                 <mat-label>Rola</mat-label>
                 <mat-select [value]="user.role" (selectionChange)="setRole(user.id, $event.value)">
                   <mat-option value="USER">Użytkownik</mat-option>
-                  <mat-option value="ANKIETER">Ankieter</mat-option>
+                  <mat-option value="SURVEYOR">Ankieter</mat-option>
                   <mat-option value="ADMIN">Administrator</mat-option>
                 </mat-select>
               </mat-form-field>

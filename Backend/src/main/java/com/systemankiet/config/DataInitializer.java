@@ -35,7 +35,7 @@ public class DataInitializer implements ApplicationRunner {
             User ankieter = User.builder()
                     .email("ankieter@test.com")
                     .password(passwordEncoder.encode("ankieter123"))
-                    .role(Role.ANKIETER)
+                    .role(Role.SURVEYOR)
                     .domain("test.com")
                     .build();
             userRepository.save(ankieter);

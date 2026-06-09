@@ -23,9 +23,9 @@ public class SurveyController {
 
     private final SurveyService surveyService;
 
-    // Ankiety stworzone przez zalogowanego uzytkownika — tylko ANKIETER i ADMIN mogą tworzyć ankiety
+    // Ankiety stworzone przez zalogowanego uzytkownika — tylko SURVEYOR i ADMIN mogą tworzyć ankiety
     @GetMapping
-    @PreAuthorize("hasAnyRole('ANKIETER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('SURVEYOR', 'ADMIN')")
     public ResponseEntity<List<SurveyDto>> getUserSurveys(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(surveyService.getUserSurveys(user));
     }
@@ -42,9 +42,9 @@ public class SurveyController {
         return ResponseEntity.ok(surveyService.getPublicSurvey(id));
     }
 
-    // Tworzy nowa ankiete — tylko ANKIETER i ADMIN
+    // Tworzy nowa ankiete — tylko SURVEYOR i ADMIN
     @PostMapping
-    @PreAuthorize("hasAnyRole('ANKIETER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('SURVEYOR', 'ADMIN')")
     public ResponseEntity<SurveyDto> createSurvey(
             @Valid @RequestBody CreateSurveyRequest request,
             @AuthenticationPrincipal User user) {
@@ -52,9 +52,9 @@ public class SurveyController {
                 .body(surveyService.createSurvey(request, user));
     }
 
-    // Aktualizuje tresc ankiety — tylko ANKIETER i ADMIN
+    // Aktualizuje tresc ankiety — tylko SURVEYOR i ADMIN
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ANKIETER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('SURVEYOR', 'ADMIN')")
     public ResponseEntity<SurveyDto> updateSurvey(
             @PathVariable Long id,
             @Valid @RequestBody CreateSurveyRequest request,
@@ -62,9 +62,9 @@ public class SurveyController {
         return ResponseEntity.ok(surveyService.updateSurvey(id, request, user));
     }
 
-    // Zmienia status ankiety — tylko ANKIETER i ADMIN
+    // Zmienia status ankiety — tylko SURVEYOR i ADMIN
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('ANKIETER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('SURVEYOR', 'ADMIN')")
     public ResponseEntity<SurveyDto> updateSurveyStatus(
             @PathVariable Long id,
             @Valid @RequestBody UpdateSurveyStatusRequest request,
@@ -72,9 +72,9 @@ public class SurveyController {
         return ResponseEntity.ok(surveyService.updateSurveyStatus(id, request, user));
     }
 
-    // Usuwa ankiete — tylko ANKIETER i ADMIN
+    // Usuwa ankiete — tylko SURVEYOR i ADMIN
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ANKIETER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('SURVEYOR', 'ADMIN')")
     public ResponseEntity<Void> deleteSurvey(
             @PathVariable Long id,
             @AuthenticationPrincipal User user) {

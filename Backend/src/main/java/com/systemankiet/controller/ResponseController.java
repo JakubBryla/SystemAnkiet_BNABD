@@ -21,9 +21,9 @@ public class ResponseController {
 
     private final ResponseService responseService;
 
-    // Pobieranie odpowiedzi ankiety - tylko twórca (ANKIETER/ADMIN)
+    // Pobieranie odpowiedzi ankiety - tylko twórca (SURVEYOR/ADMIN)
     @GetMapping("/{id}/responses")
-    @PreAuthorize("hasAnyRole('ANKIETER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('SURVEYOR', 'ADMIN')")
     public ResponseEntity<List<ResponseDetailDto>> getResponses(
             @PathVariable Long id,
             @AuthenticationPrincipal User currentUser) {

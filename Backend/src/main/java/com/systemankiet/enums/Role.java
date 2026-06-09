@@ -2,6 +2,6 @@ package com.systemankiet.enums;
 
 public enum Role {
     USER,
-    ANKIETER,
+    SURVEYOR,
     ADMIN
 }

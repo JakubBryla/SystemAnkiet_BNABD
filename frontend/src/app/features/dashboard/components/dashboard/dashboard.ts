@@ -67,7 +67,7 @@ export class Dashboard implements OnInit {
 
   get isAnkieterOrAdmin(): boolean {
     const role = localStorage.getItem('role');
-    return role === 'ANKIETER' || role === 'ADMIN';
+    return role === 'SURVEYOR' || role === 'ADMIN';
   }
 
   ngOnInit() {
@@ -75,7 +75,7 @@ export class Dashboard implements OnInit {
   }
 
   private loadSurveys() {
-    // Tylko ANKIETER i ADMIN mają własne ankiety
+    // Tylko SURVEYOR i ADMIN mają własne ankiety
     if (this.isAnkieterOrAdmin) {
       this.http.get<any[]>(this.apiUrl).subscribe({
         next: (data) => {

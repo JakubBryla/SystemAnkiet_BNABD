@@ -34,7 +34,7 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    // Ustawia konkretną rolę użytkownika: USER / ANKIETER / ADMIN — tylko dla admina
+    // Ustawia konkretną rolę użytkownika: USER / SURVEYOR / ADMIN — tylko dla admina
     @PatchMapping("/{id}/role")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDto> setRole(
@@ -54,7 +54,7 @@ public class UserController {
         try {
             newRole = Role.valueOf(roleStr.toUpperCase());
         } catch (Exception e) {
-            throw new IllegalArgumentException("Nieprawidłowa rola: " + roleStr + ". Dozwolone: USER, ANKIETER, ADMIN");
+            throw new IllegalArgumentException("Nieprawidłowa rola: " + roleStr + ". Dozwolone: USER, SURVEYOR, ADMIN");
         }
 
         user.setRole(newRole);
