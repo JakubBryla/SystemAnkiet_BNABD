@@ -35,16 +35,16 @@ public class SurveyService {
                 .collect(Collectors.toList());
     }
 
-    // Ankiety wewnetrzne przypisane do zalogowanego uzytkownika (z jego organizacji)
+    // Ankiety wewnetrzne przypisane do zalogowanego uzytkownika (z tej samej domeny emaila)
     @Transactional(readOnly = true)
     public List<SurveyDto> getAssignedSurveys(User user) {
-        if (user.getOrganization() == null) {
+        if (user.getDomain() == null || user.getDomain().isBlank()) {
             return new ArrayList<>();
         }
         return surveyRepository.findAssignedSurveys(
                 SurveyType.INTERNAL,
                 SurveyStatus.ACTIVE,
-                user.getOrganization(),
+                user.getDomain(),
                 user
             )
             .stream()

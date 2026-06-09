@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
+
 @Entity
 @Table(name = "users")
 @Getter
@@ -40,10 +41,10 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private boolean active;
 
-    // Organizacja do której należy użytkownik (opcjonalna)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organization_id")
-    private Organization organization;
+    // Domena emaila uzytkownika – wyciągana automatycznie przy rejestracji
+    // Uzytkownicy z tą samą domeną należą do tej samej organizacji
+    @Column(name = "domain")
+    private String domain;
 
     @PrePersist
     protected void onCreate() {

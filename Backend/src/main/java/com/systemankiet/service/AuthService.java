@@ -43,10 +43,14 @@ public class AuthService {
             throw new IllegalArgumentException("Email jest juz zajety");
         }
 
+        String email = request.getEmail().trim().toLowerCase();
+        String domain = email.contains("@") ? email.substring(email.indexOf("@") + 1) : null;
+
         User user = User.builder()
-            .email(request.getEmail())
+            .email(email)
             .password(passwordEncoder.encode(request.getPassword()))
             .role(Role.USER)
+            .domain(domain)
             .build();
 
         userRepository.save(user);

@@ -1,6 +1,5 @@
 package com.systemankiet.repository;
 
-import com.systemankiet.entity.Organization;
 import com.systemankiet.entity.Survey;
 import com.systemankiet.entity.User;
 import com.systemankiet.enums.SurveyStatus;
@@ -20,14 +19,14 @@ public interface SurveyRepository extends JpaRepository<Survey, Long> {
 
     Optional<Survey> findByIdAndCreatedBy(Long id, User user);
 
-    // Ankiety przypisane do uzytkownika: wewnetrzne, aktywne, z tej samej organizacji, nie stworzone przez niego
+    // Ankiety przypisane do uzytkownika: wewnetrzne, aktywne, z tej samej domeny, nie stworzone przez niego
     @Query("SELECT s FROM Survey s WHERE s.type = :type AND s.status = :status " +
-           "AND s.createdBy.organization = :org AND s.createdBy <> :excludeUser " +
+           "AND s.createdBy.domain = :domain AND s.createdBy <> :excludeUser " +
            "ORDER BY s.createdAt DESC")
     List<Survey> findAssignedSurveys(
         @Param("type") SurveyType type,
         @Param("status") SurveyStatus status,
-        @Param("org") Organization org,
+        @Param("domain") String domain,
         @Param("excludeUser") User excludeUser
     );
 }

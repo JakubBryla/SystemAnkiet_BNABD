@@ -2,7 +2,11 @@ package com.systemankiet.service;
 
 import com.systemankiet.dto.ResponseDto;
 import com.systemankiet.dto.SubmitResponseRequest;
-import com.systemankiet.entity.*;
+import com.systemankiet.entity.Question;
+import com.systemankiet.entity.ResponseAnswer;
+import com.systemankiet.entity.Survey;
+import com.systemankiet.entity.SurveyResponse;
+import com.systemankiet.entity.User;
 import com.systemankiet.enums.SurveyStatus;
 import com.systemankiet.enums.SurveyType;
 import com.systemankiet.repository.SurveyRepository;
@@ -32,15 +36,15 @@ public class ResponseService {
             throw new IllegalArgumentException("Ankieta nie jest aktywna");
         }
 
-        // Ankieta wewnetrzna - sprawdz czy uzytkownik nalezy do tej samej organizacji
+        // Ankieta wewnetrzna - sprawdz czy uzytkownik ma tę samą domenę emaila
         if (survey.getType() == SurveyType.INTERNAL) {
             if (currentUser == null) {
                 throw new IllegalArgumentException("Ankieta wewnetrzna wymaga zalogowania");
             }
-            Organization surveyOrg = survey.getCreatedBy().getOrganization();
-            Organization userOrg = currentUser.getOrganization();
-            if (surveyOrg == null || userOrg == null || !surveyOrg.getId().equals(userOrg.getId())) {
-                throw new IllegalArgumentException("Brak dostepu do ankiety wewnetrznej swojej organizacji");
+            String surveyDomain = survey.getCreatedBy().getDomain();
+            String userDomain = currentUser.getDomain();
+            if (surveyDomain == null || !surveyDomain.equalsIgnoreCase(userDomain)) {
+                throw new IllegalArgumentException("Brak dostepu – ankieta dostepna tylko dla uzytkownikow z domeny: " + surveyDomain);
             }
         }
 
