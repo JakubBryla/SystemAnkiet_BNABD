@@ -30,5 +30,16 @@ public class DataInitializer implements ApplicationRunner {
             userRepository.save(admin);
             log.info("=== Domyślne konto admina utworzone: admin@admin.com / admin123 ===");
         }
+
+        if (!userRepository.existsByEmailIgnoreCase("ankieter@test.com")) {
+            User ankieter = User.builder()
+                    .email("ankieter@test.com")
+                    .password(passwordEncoder.encode("ankieter123"))
+                    .role(Role.ANKIETER)
+                    .domain("test.com")
+                    .build();
+            userRepository.save(ankieter);
+            log.info("=== Domyślne konto ankietera utworzone: ankieter@test.com / ankieter123 ===");
+        }
     }
 }
