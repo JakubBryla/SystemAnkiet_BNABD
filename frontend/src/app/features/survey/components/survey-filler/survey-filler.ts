@@ -61,7 +61,7 @@ export class SurveyFiller implements OnInit {
   private surveyId!: string;
 
   survey: Survey | null = null;
-  viewState: 'loading' | 'active' | 'closed' | 'draft' | 'not-found' = 'loading';
+  viewState: 'loading' | 'active' | 'closed' | 'draft' | 'not-found' | 'submitted' = 'loading';
   errorMessage: string | null = null;
 
   answersForm!: FormGroup;
@@ -166,7 +166,8 @@ export class SurveyFiller implements OnInit {
     this.http.post<any>(`${this.apiUrl}/${this.surveyId}/responses`, { answers }).subscribe({
       next: () => {
         this.errorMessage = null;
-        this.viewState = 'closed';
+        this.viewState = 'submitted';
+        this.cdr.detectChanges();
       },
       error: (err) => {
         const msg = err.error?.error || 'Błąd podczas wysyłania odpowiedzi.';

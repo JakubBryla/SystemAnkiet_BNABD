@@ -110,6 +110,18 @@
       </form>
     }
 
+    @case ('submitted') {
+      <mat-card class="message-card">
+        <mat-card-header>
+          <div mat-card-avatar><mat-icon color="primary">check_circle</mat-icon></div>
+          <mat-card-title>Odpowiedź zapisana</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Dziękujemy za wypełnienie ankiety. Odpowiedź została pomyślnie przesłana.</p>
+        </mat-card-content>
+      </mat-card>
+    }
+
     @default {
       <mat-card class="message-card">
         <mat-card-header>

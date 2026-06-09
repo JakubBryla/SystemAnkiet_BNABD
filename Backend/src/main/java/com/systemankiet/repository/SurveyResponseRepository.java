@@ -11,4 +11,6 @@ import java.util.List;
 public interface SurveyResponseRepository extends JpaRepository<SurveyResponse, Long> {
 
     List<SurveyResponse> findBySurveyOrderBySubmittedAtDesc(Survey survey);
+
+    boolean existsBySurvey(Survey survey);
 }

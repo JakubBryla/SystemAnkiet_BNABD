@@ -12,6 +12,7 @@ import com.systemankiet.entity.User;
 import com.systemankiet.enums.SurveyStatus;
 import com.systemankiet.enums.SurveyType;
 import com.systemankiet.repository.SurveyRepository;
+import com.systemankiet.repository.SurveyResponseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 public class SurveyService {
 
     private final SurveyRepository surveyRepository;
+    private final SurveyResponseRepository responseRepository;
 
     @Transactional(readOnly = true)
     public List<SurveyDto> getUserSurveys(User user) {
@@ -73,6 +75,15 @@ public class SurveyService {
         survey.setDescription(request.getDescription());
         if (request.getType() != null) {
             survey.setType(parseSurveyType(request.getType()));
+        }
+
+        // Pytania można modyfikować tylko jeśli nie ma jeszcze żadnych odpowiedzi.
+        // Usunięcie pytań z istniejącymi odpowiedziami naruszyłoby FK response_answers.question_id.
+        if (responseRepository.existsBySurvey(survey)) {
+            throw new IllegalArgumentException(
+                "Nie można modyfikować pytań ankiety, która ma już zapisane odpowiedzi. " +
+                "Możliwe jest tylko zamknięcie ankiety."
+            );
         }
 
         survey.getQuestions().clear();
