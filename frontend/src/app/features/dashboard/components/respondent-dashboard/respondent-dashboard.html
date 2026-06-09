@@ -2,12 +2,28 @@
   <div class="dashboard-header">
     <div class="header-text">
       <h1>Moje Ankiety</h1>
-      <p>Ankiety wewnątrzfirmowe przypisane do Twojego konta. Pamiętaj, że Twoje odpowiedzi pomagają nam się rozwijać!</p>
+      <p>Ankiety wewnątrzfirmowe przypisane do Twojego konta.</p>
     </div>
   </div>
 
+  <div class="toolbar">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Szukaj ankiety</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput [(ngModel)]="searchQuery" (ngModelChange)="pageIndex = 0" placeholder="Wpisz nazwę...">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="sort-field">
+      <mat-label>Sortuj po nazwie</mat-label>
+      <mat-select [(ngModel)]="sortDirection" (ngModelChange)="pageIndex = 0">
+        <mat-option value="asc">A - Z</mat-option>
+        <mat-option value="desc">Z - A</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
   <div class="surveys-grid">
-    @for (survey of availableSurveys; track survey.id) {
+    @for (survey of paginatedSurveys; track survey.id) {
       <mat-card class="survey-card">
         <mat-card-header>
           <div class="header-content">
@@ -15,25 +31,31 @@
             <mat-card-title>{{ survey.title }}</mat-card-title>
           </div>
         </mat-card-header>
-        
         <mat-card-content>
           <p class="survey-description">{{ survey.description }}</p>
         </mat-card-content>
-        
         <mat-card-actions class="card-actions">
-          <!-- Ten przycisk przenosi od razu do wypełniania -->
           <a mat-flat-button color="primary" [routerLink]="['/s', survey.id]">
-            <mat-icon>assignment</mat-icon>
-            Wypełnij ankietę
+            <mat-icon>assignment</mat-icon> Wypełnij
           </a>
         </mat-card-actions>
       </mat-card>
     } @empty {
       <div class="empty-state">
-        <mat-icon class="empty-icon">check_circle_outline</mat-icon>
-        <h2>Wszystko zrobione!</h2>
-        <p>Nie masz obecnie żadnych nowych ankiet do wypełnienia w swojej organizacji.</p>
+        <mat-icon class="empty-icon">search_off</mat-icon>
+        <h2>Brak wyników</h2>
+        <p>Nie znaleźliśmy ankiet pasujących do kryteriów.</p>
       </div>
     }
   </div>
+
+  @if (processedSurveys.length > 0) {
+    <mat-paginator 
+      [length]="processedSurveys.length"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[3, 6, 12]"
+      (page)="onPageChange($event)"
+      class="custom-paginator">
+    </mat-paginator>
+  }
 </div>

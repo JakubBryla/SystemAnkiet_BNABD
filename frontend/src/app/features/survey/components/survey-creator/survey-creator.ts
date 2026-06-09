@@ -29,12 +29,6 @@ export const optionsValidator: ValidatorFn = (control: AbstractControl): Validat
   return null;
 };
 
-export interface CleaningRule {
-  firstQuestion: string;
-  firstAnswer: string;
-  secondQuestion: string;
-  secondAnswer: string;
-}
 
 @Component({
   selector: 'app-survey-creator',
@@ -95,9 +89,24 @@ export class SurveyCreator implements OnInit {
       text: ['', Validators.required], 
       type: ['short-answer', Validators.required],
       isRequired: [true],
-      options: this.fb.array([]) 
+      options: this.fb.array([]),
+      isControlQuestion: [false],
+      expectedValue: [''] 
     }, { validators: optionsValidator });
     
+    questionForm.get('isControlQuestion')?.valueChanges.subscribe(isControl => {
+      const expectedValueControl = questionForm.get('expectedValue');
+      if (isControl) {
+        // włączone -> odpowiedź absolutnie wymagana
+        expectedValueControl?.setValidators([Validators.required]);
+      } else {
+        // wyłączone -> zdejmujemy wymóg i ewentualnie czyścimy pole
+        expectedValueControl?.clearValidators();
+        expectedValueControl?.setValue('');
+      }
+      expectedValueControl?.updateValueAndValidity();
+    });
+
     this.questions.push(questionForm);
   }
 
@@ -129,18 +138,5 @@ export class SurveyCreator implements OnInit {
     }
   }
 
-  cleaningRules: CleaningRule[] = [];
-
-  addCleaningRule() {
-    this.cleaningRules.push({
-      firstQuestion: '',
-      firstAnswer: '',
-      secondQuestion: '',
-      secondAnswer: ''
-    });
-  }
-
-  removeCleaningRule(index: number) {
-    this.cleaningRules.splice(index, 1);
-  }
+  
 }

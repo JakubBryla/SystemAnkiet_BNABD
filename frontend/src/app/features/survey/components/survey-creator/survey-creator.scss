@@ -131,36 +131,43 @@ h2 {
   gap: 16px;
 }
 
-.logic-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap; /* Zezwala na zawijanie do nowej linii, gdy brakuje miejsca */
-  gap: 12px;
-  background: var(--mat-sys-surface-container-lowest);
-  padding: 16px;
-  border-radius: 8px;
-  border-left: 4px solid var(--mat-sys-error);
-
-  .logic-keyword {
-    font-weight: bold;
-    font-size: 0.9rem;
-    color: var(--mat-sys-on-surface-variant);
-  }
+.control-question-section {
+  margin-top: 24px;
   
-  .condition-and {
-    color: var(--mat-sys-primary); /* Wyróżniamy słowo ORAZ kolorem głównym aplikacji */
-    font-size: 1rem;
-    padding: 0 8px;
+  .question-divider {
+    margin-bottom: 16px;
   }
 
-  .result-keyword {
-    color: var(--mat-sys-error);
-    margin-left: auto; /* Wypycha "TO ODRZUĆ" i kosz na prawą stronę */
+  mat-slide-toggle {
+    margin-bottom: 16px;
   }
+}
 
-  .logic-field {
-    margin-bottom: -1.25em;
-    min-width: 180px;
-    flex-grow: 1; /* Pozwala polom rozciągać się w razie potrzeby */
+.question-bottom-actions {
+  display: flex;
+  flex-wrap: wrap; 
+  gap: 32px; 
+  align-items: center;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--mat-sys-outline-variant); 
+}
+
+::ng-deep .mat-mdc-slide-toggle-label {
+  white-space: normal !important;
+  line-height: 1.4;
+}
+
+.expected-value-container {
+  display: flex;
+  flex-direction: column;
+  margin-top: 24px; 
+  background: var(--mat-sys-surface-container-lowest);
+  padding: 16px 16px 24px 16px; 
+  border-radius: 8px;
+  border-left: 4px solid var(--mat-sys-accent); 
+  
+  .expected-value-field {
+    width: 100%;
   }
 }

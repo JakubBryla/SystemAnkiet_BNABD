@@ -10,6 +10,11 @@ import { RouterModule } from '@angular/router';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CreateSurveyDialog } from '../create-survey-dialog/create-survey-dialog';
 import { DeleteSurveyDialog } from '../delete-survey-dialog/delete-survey-dialog';
+import { FormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 
 export interface SurveySummary {
   id: number;
@@ -30,7 +35,12 @@ export interface SurveySummary {
     MatChipsModule,
     RouterModule,
     NgClass,
-    MatSnackBarModule
+    MatSnackBarModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatPaginatorModule
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
@@ -138,5 +148,49 @@ export class Dashboard {
     }).catch(err => {
       console.error('Błąd podczas kopiowania linku: ', err);
     });
+  }
+
+  searchQuery = '';
+  sortBy: 'title' | 'status' | 'accessType' = 'title';
+  sortDirection: 'asc' | 'desc' = 'asc';
+  filterStatus: 'all' | 'draft' | 'active' | 'closed' = 'all';
+  filterAccessType: 'all' | 'INTERNAL' | 'EXTERNAL' = 'all';
+  pageSize = 6;
+  pageIndex = 0;
+
+  get processedSurveys() {
+    // Filtrowanie
+    const result = this.surveys.filter(s => {
+      const matchSearch = s.title.toLowerCase().includes(this.searchQuery.toLowerCase());
+      const matchStatus = this.filterStatus === 'all' || s.status === this.filterStatus;
+      const matchAccess = this.filterAccessType === 'all' || s.accessType === this.filterAccessType;
+      
+      return matchSearch && matchStatus && matchAccess;
+    });
+
+    // Sortowanie
+    result.sort((a, b) => {
+      let comp = 0;
+      if (this.sortBy === 'title') {
+        comp = a.title.localeCompare(b.title);
+      } else if (this.sortBy === 'status') {
+        comp = a.status.localeCompare(b.status);
+      } else if (this.sortBy === 'accessType') {
+        comp = a.accessType.localeCompare(b.accessType);
+      }
+      return this.sortDirection === 'asc' ? comp : -comp;
+    });
+
+    return result;
+  }
+
+  get paginatedSurveys() {
+    const start = this.pageIndex * this.pageSize;
+    return this.processedSurveys.slice(start, start + this.pageSize);
+  }
+
+  onPageChange(event: PageEvent) {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
   }
 }
