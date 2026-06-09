@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -51,6 +52,7 @@ export class Dashboard implements OnInit {
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
   private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
 
   private apiUrl = 'http://localhost:8080/api/surveys';
 
@@ -71,6 +73,11 @@ export class Dashboard implements OnInit {
   }
 
   ngOnInit() {
+    // Zwykły użytkownik nie ma tu czego szukać — przekieruj na /my-surveys
+    if (localStorage.getItem('role') === 'USER') {
+      this.router.navigate(['/my-surveys']);
+      return;
+    }
     this.loadSurveys();
   }
 
