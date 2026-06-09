@@ -9,8 +9,18 @@
       <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
         
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Adres e-mail</mat-label>
-          <input matInput type="email" formControlName="email" placeholder="jan@kowalski.pl">
+          <mat-label>Imię</mat-label>
+          <input matInput formControlName="firstName" placeholder="np. Jan">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nazwisko</mat-label>
+          <input matInput formControlName="lastName" placeholder="np. Kowalski">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Służbowy adres e-mail</mat-label>
+          <input matInput type="email" formControlName="email" placeholder="jan.kowalski@nazwafirmy.pl">
           @if (registerForm.get('email')?.hasError('email')) {
             <mat-error>Niepoprawny format adresu e-mail</mat-error>
           }
@@ -31,6 +41,13 @@
 
         @if (registerForm.hasError('passwordsMismatch') && registerForm.get('confirmPassword')?.touched) {
           <div class="custom-error-message">Hasła nie są identyczne!</div>
+        }
+
+        @if (serverError()) {
+          <div class="custom-error-message" style="margin-top: 8px;">
+            <mat-icon style="vertical-align: middle; font-size: 16px; width: 16px; height: 16px;">error_outline</mat-icon>
+            {{ serverError() }}
+          </div>
         }
 
         <button mat-flat-button color="accent" class="full-width register-btn" type="submit" [disabled]="registerForm.invalid">
