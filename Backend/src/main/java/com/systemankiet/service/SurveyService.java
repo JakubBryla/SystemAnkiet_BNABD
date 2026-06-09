@@ -12,6 +12,7 @@ import com.systemankiet.entity.User;
 import com.systemankiet.enums.SurveyStatus;
 import com.systemankiet.enums.SurveyType;
 import com.systemankiet.repository.SurveyRepository;
+import com.systemankiet.repository.SurveyResponseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 public class SurveyService {
 
     private final SurveyRepository surveyRepository;
+    private final SurveyResponseRepository responseRepository;
 
     @Transactional(readOnly = true)
     public List<SurveyDto> getUserSurveys(User user) {
@@ -75,8 +77,14 @@ public class SurveyService {
             survey.setType(parseSurveyType(request.getType()));
         }
 
-        survey.getQuestions().clear();
-        survey.getQuestions().addAll(buildQuestions(request.getQuestions(), survey));
+        // Pytania można modyfikować tylko jeśli nie ma jeszcze żadnych odpowiedzi.
+        // Usunięcie pytań z istniejącymi odpowiedziami naruszyłoby FK response_answers.question_id.
+        if (!responseRepository.existsBySurvey(survey)) {
+            survey.getQuestions().clear();
+            survey.getQuestions().addAll(buildQuestions(request.getQuestions(), survey));
+        }
+        // Jeśli odpowiedzi istnieją — metadata (tytuł/opis/typ) zostaje zaktualizowana,
+        // a pytania pozostają bez zmian (zablokowane ze względu na spójność danych).
 
         return SurveyDto.fromEntity(surveyRepository.save(survey));
     }
@@ -97,13 +105,22 @@ public class SurveyService {
         // Zwraca ankietę niezależnie od statusu - frontend sam obsługuje stany draft/closed/active
         Survey survey = surveyRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Ankieta nie znaleziona"));
-        return SurveyDetailDto.fromEntity(survey);
+        SurveyDetailDto dto = SurveyDetailDto.fromEntity(survey);
+        long count = responseRepository.countBySurvey(survey);
+        dto.setHasResponses(count > 0);
+        dto.setResponseCount(count);
+        return dto;
     }
 
     @Transactional
     public void deleteSurvey(Long id, User user) {
         Survey survey = surveyRepository.findByIdAndCreatedBy(id, user)
                 .orElseThrow(() -> new NoSuchElementException("Ankieta nie znaleziona lub brak uprawnien"));
+
+        // Najpierw usuń odpowiedzi (kaskadowo usuwa response_answers przez CascadeType.ALL).
+        // Bez tego SQL Server blokuje usunięcie questions przez FK response_answers.question_id.
+        responseRepository.deleteAllBySurvey(survey);
+
         surveyRepository.delete(survey);
     }
 
@@ -131,7 +148,6 @@ public class SurveyService {
             question.setRequired(Boolean.TRUE.equals(qDto.getIsRequired()));
             question.setControlQuestion(Boolean.TRUE.equals(qDto.getIsControlQuestion()));
             question.setExpectedValue(qDto.getExpectedValue());
-            question.setFailStatus(qDto.getFailStatus());
             question.setSurvey(survey);
             question.setOptions(new ArrayList<>());
 

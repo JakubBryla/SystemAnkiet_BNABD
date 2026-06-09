@@ -1,82 +1,207 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
+
+interface AnswerDetail {
+  questionId: number;
+  questionText: string;
+  questionType: string;
+  answerValue: string;
+}
+
+interface ResponseDetail {
+  id: number;
+  submittedAt: string;
+  flagged: boolean;
+  flagStatus: string | null;
+  flagReason: string | null;
+  answers: AnswerDetail[];
+}
+
+interface QuestionStats {
+  id: number;
+  text: string;
+  type: string;
+  // Dla pytań z opcjami: liczba wyborów każdej opcji
+  counts: Record<string, number>;
+  // Dla pytań tekstowych: lista odpowiedzi
+  textAnswers: string[];
+  totalAnswers: number;
+}
 
 @Component({
   selector: 'app-survey-results',
   imports: [
     FormsModule,
     MatCardModule,
-    MatSlideToggleModule,
+    MatButtonModule,
     MatIconModule,
+    MatSlideToggleModule,
+    MatProgressSpinnerModule,
+    RouterModule,
     BaseChartDirective
   ],
   templateUrl: './survey-results.html',
   styleUrl: './survey-results.scss',
 })
-export class SurveyResults {
+export class SurveyResults implements OnInit {
+  private route = inject(ActivatedRoute);
+  private http = inject(HttpClient);
+  private cdr = inject(ChangeDetectorRef);
+
+  private apiUrl = 'http://localhost:8080/api/surveys';
+  private surveyId!: string;
+
+  surveyTitle = '';
+  isLoading = true;
+  errorMessage: string | null = null;
+
+  allResponses: ResponseDetail[] = [];
   isDataCleaningEnabled = false;
 
-  // Wykres 1: Kołowy 
-  public pieChartType: ChartType = 'pie';
-  public pieChartData: ChartData<'pie', number[], string | string[]> = {
-    labels: ['Bardzo dobrze', 'Dobrze', 'Przeciętnie', 'Źle'],
-    datasets: [{ 
-      data: [300, 500, 100, 50],
-      backgroundColor: ['#4caf50', '#8bc34a', '#ffeb3b', '#f44336'] 
-    }]
-  };
+  questionStats: QuestionStats[] = [];
 
-  // Wykres 2: Słupkowy
-  public barChartType: ChartType = 'bar';
-  public barChartData: ChartData<'bar', number[], string | string[]> = {
-    labels: ['Kawa', 'Hot-dog', 'Myjnia', 'Płyn do spryskiwaczy'],
-    datasets: [
-      { data: [650, 420, 300, 150], label: 'Liczba wyborów', backgroundColor: '#1a73e8' }
-    ]
-  };
+  // Kolory dla wykresów
+  private chartColors = [
+    '#1a73e8', '#34a853', '#fbbc04', '#ea4335',
+    '#9c27b0', '#ff5722', '#00bcd4', '#607d8b'
+  ];
 
-  // Opcje dla wykresu słupkowego, żeby zawsze zaczynał się od zera
+  ngOnInit() {
+    this.surveyId = this.route.snapshot.paramMap.get('id')!;
+    this.loadData();
+  }
+
+  private loadData() {
+    this.isLoading = true;
+    this.errorMessage = null;
+
+    // Ładujemy survey info + odpowiedzi równolegle
+    this.http.get<any>(`${this.apiUrl}/${this.surveyId}/public`).subscribe({
+      next: (survey) => {
+        this.surveyTitle = survey.title;
+        this.loadResponses();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMessage = 'Nie można załadować danych ankiety.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private loadResponses() {
+    this.http.get<ResponseDetail[]>(`${this.apiUrl}/${this.surveyId}/responses`).subscribe({
+      next: (responses) => {
+        this.allResponses = responses;
+        this.buildStats();
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMessage = err.error?.error || 'Nie można załadować odpowiedzi.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private buildStats() {
+    const responses = this.isDataCleaningEnabled
+      ? this.allResponses.filter(r => !r.flagged)
+      : this.allResponses;
+
+    // Zbierz unikalne pytania z pierwszej odpowiedzi (kolejność zachowana)
+    const questionMap = new Map<number, QuestionStats>();
+
+    for (const response of responses) {
+      for (const answer of response.answers) {
+        if (!questionMap.has(answer.questionId)) {
+          questionMap.set(answer.questionId, {
+            id: answer.questionId,
+            text: answer.questionText,
+            type: answer.questionType,
+            counts: {},
+            textAnswers: [],
+            totalAnswers: 0
+          });
+        }
+
+        const stats = questionMap.get(answer.questionId)!;
+        if (!answer.answerValue) continue;
+
+        if (answer.questionType === 'short-answer') {
+          stats.textAnswers.push(answer.answerValue);
+        } else if (answer.questionType === 'multiple-choice') {
+          // Odpowiedź przechowywana jako "Opcja A, Opcja B"
+          const parts = answer.answerValue.split(',').map(s => s.trim()).filter(s => s);
+          for (const part of parts) {
+            stats.counts[part] = (stats.counts[part] ?? 0) + 1;
+          }
+        } else {
+          // single-choice
+          stats.counts[answer.answerValue] = (stats.counts[answer.answerValue] ?? 0) + 1;
+        }
+        stats.totalAnswers++;
+      }
+    }
+
+    this.questionStats = Array.from(questionMap.values());
+  }
+
+  get displayedResponses(): ResponseDetail[] {
+    return this.isDataCleaningEnabled
+      ? this.allResponses.filter(r => !r.flagged)
+      : this.allResponses;
+  }
+
+  get flaggedCount(): number {
+    return this.allResponses.filter(r => r.flagged).length;
+  }
+
+  toggleDataCleaning() {
+    this.buildStats();
+    this.cdr.detectChanges();
+  }
+
+  // Buduje ChartData dla pytania single-choice (pie)
+  getPieData(stats: QuestionStats): ChartData<'pie', number[], string> {
+    const labels = Object.keys(stats.counts);
+    return {
+      labels,
+      datasets: [{
+        data: labels.map(l => stats.counts[l]),
+        backgroundColor: labels.map((_, i) => this.chartColors[i % this.chartColors.length])
+      }]
+    };
+  }
+
+  // Buduje ChartData dla pytania multiple-choice lub single-choice (bar)
+  getBarData(stats: QuestionStats): ChartData<'bar', number[], string> {
+    const labels = Object.keys(stats.counts);
+    return {
+      labels,
+      datasets: [{
+        data: labels.map(l => stats.counts[l]),
+        label: 'Liczba wyborów',
+        backgroundColor: this.chartColors[0]
+      }]
+    };
+  }
+
   public barChartOptions: ChartConfiguration['options'] = {
     responsive: true,
-    scales: { y: { beginAtZero: true } }
+    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
   };
 
-  rawTextAnswers = [
-    'Super obsługa, polecam!', 
-    'asdfghjkl', // Śmieciowa odpowiedź do odfiltrowania
-    'Brakowało mojego ulubionego hot-doga wege.',
-    'nie wiem', // Kolejny śmieć
-    'Czyste toalety, ale kawa mogłaby być tańsza.'
-  ];
-  cleanTextAnswers = [
-    'Super obsługa, polecam!', 
-    'Brakowało mojego ulubionego hot-doga wege.',
-    'Czyste toalety, ale kawa mogłaby być tańsza.'
-  ];
-  
-  // Zmienna, którą wyświetlamy w HTML
-  currentTextAnswers = this.rawTextAnswers;
-
-  // Funkcja wywoływana przy kliknięciu przełącznika "Data Cleaning"
-  toggleDataCleaning() {
-    if (this.isDataCleaningEnabled) {
-      this.pieChartData.datasets[0].data = [290, 480, 80, 20];
-      this.barChartData.datasets[0].data = [600, 400, 250, 100];
-      // Podmieniamy na wyczyszczone teksty
-      this.currentTextAnswers = this.cleanTextAnswers;
-    } else {
-      this.pieChartData.datasets[0].data = [300, 500, 100, 50];
-      this.barChartData.datasets[0].data = [650, 420, 300, 150];
-      // Przywracamy śmieciowe komentarze
-      this.currentTextAnswers = this.rawTextAnswers;
-    }
-    
-    this.pieChartData = { ...this.pieChartData };
-    this.barChartData = { ...this.barChartData };
-  }
+  public pieChartType: ChartType = 'pie';
+  public barChartType: ChartType = 'bar';
 }

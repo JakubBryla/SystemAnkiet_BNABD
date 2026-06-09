@@ -1,4 +1,7 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { catchError, throwError } from 'rxjs';
 import { TRUSTED_API_HOSTS } from '../../../core/constants/api.constants';
 
 /**
@@ -6,31 +9,34 @@ import { TRUSTED_API_HOSTS } from '../../../core/constants/api.constants';
  */
 function isTrustedApiUrl(url: string): boolean {
   try {
-    // Handle relative URLs by checking if they start with /api
     if (url.startsWith('/api')) {
       return true;
     }
-
-    // For absolute URLs, check the host
     const requestUrl = new URL(url);
-    // hostname nie zawiera portu (np. "localhost"), host zawiera port ("localhost:8080")
     return TRUSTED_API_HOSTS.some(trustedHost => requestUrl.hostname === trustedHost);
   } catch {
-    // If URL parsing fails, assume it's not trusted
     return false;
   }
 }
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const router = inject(Router);
   const token = localStorage.getItem('token');
 
-  // Only add Authorization header for trusted API URLs
-  if (token && isTrustedApiUrl(req.url)) {
-    const cloned = req.clone({
-      setHeaders: { Authorization: `Bearer ${token}` }
-    });
-    return next(cloned);
-  }
+  const cloned = (token && isTrustedApiUrl(req.url))
+    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+    : req;
 
-  return next(req);
+  return next(cloned).pipe(
+    catchError((err: HttpErrorResponse) => {
+      if (err.status === 401 && isTrustedApiUrl(req.url)) {
+        // Token wygasł lub użytkownik wylogował się w innej karcie
+        localStorage.removeItem('token');
+        localStorage.removeItem('email');
+        localStorage.removeItem('role');
+        router.navigate(['/login']);
+      }
+      return throwError(() => err);
+    })
+  );
 };

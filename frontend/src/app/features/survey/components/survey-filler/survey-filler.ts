@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { timeout, TimeoutError } from 'rxjs';
@@ -33,12 +33,15 @@ export interface Survey {
   title: string;
   description: string;
   status: 'active' | 'closed' | 'draft';
+  type: 'internal' | 'external';
+  creatorDomain: string | null;
   questions: Question[];
 }
 
 @Component({
   selector: 'app-survey-filler',
   imports: [
+    RouterModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -53,6 +56,7 @@ export interface Survey {
 })
 export class SurveyFiller implements OnInit {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
   private cdr = inject(ChangeDetectorRef);
@@ -61,7 +65,8 @@ export class SurveyFiller implements OnInit {
   private surveyId!: string;
 
   survey: Survey | null = null;
-  viewState: 'loading' | 'active' | 'closed' | 'draft' | 'not-found' = 'loading';
+  viewState: 'loading' | 'active' | 'closed' | 'draft' | 'not-found' | 'submitted' | 'login-required' | 'access-denied' = 'loading';
+  accessDeniedDomain: string | null = null;
   errorMessage: string | null = null;
 
   answersForm!: FormGroup;
@@ -78,6 +83,8 @@ export class SurveyFiller implements OnInit {
             title: data.title,
             description: data.description ?? '',
             status: data.status,
+            type: data.type ?? 'external',
+            creatorDomain: data.creatorDomain ?? null,
             questions: (data.questions ?? []).map((q: any) => ({
               id: q.id,
               text: q.text,
@@ -88,6 +95,31 @@ export class SurveyFiller implements OnInit {
               expectedValue: q.expectedValue
             }))
           };
+
+          // Ankieta wewnętrzna — sprawdź logowanie i domenę
+          if (this.survey.type === 'internal') {
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+              // Niezalogowany — zapisz returnUrl i pokaż ekran logowania
+              sessionStorage.setItem('loginReturnUrl', `/s/${this.surveyId}`);
+              this.viewState = 'login-required';
+              this.cdr.detectChanges();
+              return;
+            }
+
+            // Zalogowany — sprawdź domenę
+            const userEmail = localStorage.getItem('email') ?? '';
+            const userDomain = userEmail.includes('@') ? userEmail.split('@')[1].toLowerCase() : '';
+            const surveyDomain = (this.survey.creatorDomain ?? '').toLowerCase();
+
+            if (surveyDomain && userDomain !== surveyDomain) {
+              this.accessDeniedDomain = this.survey.creatorDomain;
+              this.viewState = 'access-denied';
+              this.cdr.detectChanges();
+              return;
+            }
+          }
 
           this.viewState = this.survey.status;
           if (this.viewState === 'active') {
@@ -147,6 +179,11 @@ export class SurveyFiller implements OnInit {
     control.markAsTouched();
   }
 
+  goToLogin() {
+    sessionStorage.setItem('loginReturnUrl', `/s/${this.surveyId}`);
+    this.router.navigate(['/login']);
+  }
+
   submitAnswers() {
     if (!this.answersForm.valid) return;
 
@@ -166,7 +203,8 @@ export class SurveyFiller implements OnInit {
     this.http.post<any>(`${this.apiUrl}/${this.surveyId}/responses`, { answers }).subscribe({
       next: () => {
         this.errorMessage = null;
-        this.viewState = 'closed';
+        this.viewState = 'submitted';
+        this.cdr.detectChanges();
       },
       error: (err) => {
         const msg = err.error?.error || 'Błąd podczas wysyłania odpowiedzi.';

@@ -1,5 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectorRef } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,74 +10,110 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 export interface User {
   id: number;
-  firstName: string;
-  lastName: string;
   email: string;
-  role: 'RESPONDENT' | 'SURVEYOR' | 'ADMIN';
+  firstName: string | null;
+  lastName: string | null;
+  role: 'USER' | 'ADMIN';
+  domain: string | null;
+  active: boolean;
 }
 
 @Component({
   selector: 'app-admin-panel',
   standalone: true,
   imports: [
-    MatCardModule, 
-    MatButtonModule, 
-    MatIconModule, 
-    MatChipsModule, 
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatChipsModule,
     NgClass,
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    MatProgressSpinnerModule,
+    MatSnackBarModule
   ],
   templateUrl: './admin-panel.html',
   styleUrl: './admin-panel.scss'
 })
-export class AdminPanel {
-  
-  users = signal<User[]>([
-    { id: 1, firstName: 'Jan', lastName: 'Kowalski', email: 'jan.kowalski@nazwafirmy.pl', role: 'RESPONDENT' },
-    { id: 2, firstName: 'Anna', lastName: 'Nowak', email: 'anna.nowak@nazwafirmy.pl', role: 'SURVEYOR' },
-    { id: 3, firstName: 'Michał', lastName: 'Szef', email: 'michal.szef@nazwafirmy.pl', role: 'ADMIN' },
-    { id: 4, firstName: 'Piotr', lastName: 'Zieliński', email: 'piotr.zielinski@nazwafirmy.pl', role: 'RESPONDENT' },
-    { id: 5, firstName: 'Katarzyna', lastName: 'Wiśniewska', email: 'katarzyna.wisniewska@nazwafirmy.pl', role: 'RESPONDENT' },
-    { id: 6, firstName: 'Adam', lastName: 'Krawczyk', email: 'adam.krawczyk@nazwafirmy.pl', role: 'SURVEYOR' },
-    { id: 7, firstName: 'Ewa', lastName: 'Lis', email: 'ewa.lis@nazwafirmy.pl', role: 'RESPONDENT' }
-  ]);
+export class AdminPanel implements OnInit {
+  private http = inject(HttpClient);
+  private snackBar = inject(MatSnackBar);
+  private cdr = inject(ChangeDetectorRef);
+
+  private apiUrl = 'http://localhost:8080/api/users';
+
+  users = signal<User[]>([]);
+  isLoading = true;
+  errorMessage: string | null = null;
 
   // --- STANY FILTRÓW I PAGINACJI ---
   searchQuery = '';
-  filterRole: 'all' | 'RESPONDENT' | 'SURVEYOR' | 'ADMIN' = 'all';
-  sortBy: 'lastName' | 'email' | 'role' = 'lastName';
+  filterRole: 'all' | 'USER' | 'ADMIN' = 'all';
+  sortBy: 'name' | 'email' | 'role' | 'domain' = 'email';
   sortDirection: 'asc' | 'desc' = 'asc';
-  
+
   pageIndex = 0;
   pageSize = 5;
 
+  ngOnInit() {
+    this.loadUsers();
+  }
+
+  private loadUsers() {
+    this.isLoading = true;
+    this.errorMessage = null;
+
+    this.http.get<User[]>(this.apiUrl).subscribe({
+      next: (users) => {
+        this.users.set(users);
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.isLoading = false;
+        this.errorMessage = 'Nie można załadować listy użytkowników.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  /** Zwraca czytelną nazwę użytkownika: imię + nazwisko lub sam email */
+  displayName(user: User): string {
+    const fn = user.firstName?.trim() ?? '';
+    const ln = user.lastName?.trim() ?? '';
+    return (fn || ln) ? `${fn} ${ln}`.trim() : user.email;
+  }
+
   // --- PRZETWARZANIE DANYCH ---
   get processedUsers() {
+    const q = this.searchQuery.toLowerCase();
     const filtered = this.users().filter(u => {
-      const fullName = `${u.firstName} ${u.lastName}`.toLowerCase();
-      const matchSearch = fullName.includes(this.searchQuery.toLowerCase()) || 
-                          u.email.toLowerCase().includes(this.searchQuery.toLowerCase());
-      
+      const name = this.displayName(u).toLowerCase();
+      const matchSearch = name.includes(q) ||
+        u.email.toLowerCase().includes(q) ||
+        (u.domain ?? '').toLowerCase().includes(q);
       const matchRole = this.filterRole === 'all' || u.role === this.filterRole;
-      
       return matchSearch && matchRole;
     });
 
     return [...filtered].sort((a, b) => {
       let comp = 0;
-      if (this.sortBy === 'lastName') {
-        comp = a.lastName.localeCompare(b.lastName);
+      if (this.sortBy === 'name') {
+        comp = this.displayName(a).localeCompare(this.displayName(b));
       } else if (this.sortBy === 'email') {
-        comp = a.email.localeCompare(b.email);
+        comp = (a.email ?? '').localeCompare(b.email ?? '');
       } else if (this.sortBy === 'role') {
-        comp = a.role.localeCompare(b.role);
+        comp = (a.role ?? '').localeCompare(b.role ?? '');
+      } else if (this.sortBy === 'domain') {
+        comp = (a.domain ?? '').localeCompare(b.domain ?? '');
       }
       return this.sortDirection === 'asc' ? comp : -comp;
     });
@@ -93,21 +130,23 @@ export class AdminPanel {
   }
 
   // --- AKCJE ---
-  toggleSurveyorRole(userId: number) {
-    this.users.update(currentUsers => 
-      currentUsers.map(user => {
-        if (user.id === userId && user.role !== 'ADMIN') {
-          const newRole = user.role === 'SURVEYOR' ? 'RESPONDENT' : 'SURVEYOR';
-          return { ...user, role: newRole };
-        }
-        return user;
-      })
-    );
+  toggleRole(userId: number) {
+    this.http.patch<User>(`${this.apiUrl}/${userId}/role`, {}).subscribe({
+      next: (updated) => {
+        this.users.update(list => list.map(u => u.id === userId ? updated : u));
+        const label = updated.role === 'ADMIN' ? 'Administrator' : 'Użytkownik';
+        this.snackBar.open(`Rola zmieniona na: ${label}`, 'OK', { duration: 3000 });
+        this.cdr.detectChanges();
 
-    // Obliczamy maksymalny dozwolony indeks strony na podstawie NOWEGO zestawu danych
-    const maxPageIndex = Math.max(0, Math.ceil(this.processedUsers.length / this.pageSize) - 1);
-    if (this.pageIndex > maxPageIndex) {
-      this.pageIndex = maxPageIndex;
-    }
+        const maxPage = Math.max(0, Math.ceil(this.processedUsers.length / this.pageSize) - 1);
+        if (this.pageIndex > maxPage) {
+          this.pageIndex = maxPage;
+        }
+      },
+      error: (err) => {
+        const msg = err.error?.message || err.error?.error || 'Nie można zmienić roli.';
+        this.snackBar.open(msg, 'OK', { duration: 4000 });
+      }
+    });
   }
 }

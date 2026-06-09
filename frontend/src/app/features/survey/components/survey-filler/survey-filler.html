@@ -8,6 +8,40 @@
       </div>
     }
 
+    @case ('access-denied') {
+      <mat-card class="message-card">
+        <mat-card-header>
+          <div mat-card-avatar><mat-icon color="warn">block</mat-icon></div>
+          <mat-card-title>Brak dostępu</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Ta ankieta jest dostępna wyłącznie dla pracowników organizacji <strong>{{ accessDeniedDomain }}</strong>.</p>
+          <p>Twoje konto należy do innej domeny.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button routerLink="/dashboard">Wróć do panelu</button>
+        </mat-card-actions>
+      </mat-card>
+    }
+
+    @case ('login-required') {
+      <mat-card class="message-card">
+        <mat-card-header>
+          <div mat-card-avatar><mat-icon color="primary">lock_person</mat-icon></div>
+          <mat-card-title>Ankieta wewnętrzna</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Ta ankieta jest dostępna wyłącznie dla zalogowanych pracowników organizacji. Zaloguj się, aby kontynuować.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-flat-button color="primary" (click)="goToLogin()">
+            <mat-icon>login</mat-icon>
+            Przejdź do logowania
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    }
+
     @case ('closed') {
       <mat-card class="message-card">
         <mat-card-header>
@@ -108,6 +142,18 @@
         </div>
 
       </form>
+    }
+
+    @case ('submitted') {
+      <mat-card class="message-card">
+        <mat-card-header>
+          <div mat-card-avatar><mat-icon color="primary">check_circle</mat-icon></div>
+          <mat-card-title>Odpowiedź zapisana</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Dziękujemy za wypełnienie ankiety. Odpowiedź została pomyślnie przesłana.</p>
+        </mat-card-content>
+      </mat-card>
     }
 
     @default {

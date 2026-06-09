@@ -18,6 +18,9 @@ import lombok.ToString;
 @EqualsAndHashCode(exclude = {"password", "confirmPassword"})
 public class RegisterRequest {
 
+    private String firstName;
+    private String lastName;
+
     @NotBlank(message = "Email jest wymagany")
     @Email(message = "Nieprawidlowy format email")
     private String email;

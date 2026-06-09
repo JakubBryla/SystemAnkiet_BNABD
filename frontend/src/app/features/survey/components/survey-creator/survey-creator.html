@@ -36,6 +36,13 @@
       </mat-card-content>
     </mat-card>
 
+    @if (hasResponses) {
+      <div style="background: #fff3e0; border: 1px solid #ff9800; border-radius: 4px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+        <mat-icon style="color: #ff9800;">lock</mat-icon>
+        <span>Pytania są zablokowane — ankieta ma już <strong>{{ responseCount }}</strong> {{ responseCount === 1 ? 'odpowiedź' : 'odpowiedzi' }}. Możesz edytować tylko tytuł, opis i typ dostępu.</span>
+      </div>
+    }
+
     <div formArrayName="questions">
       
       @for (question of questions.controls; track qIndex; let qIndex = $index) {
@@ -43,7 +50,7 @@
         <mat-card class="question-card" [formGroupName]="qIndex">
           <mat-card-header class="question-header">
             <mat-card-title>Pytanie {{ qIndex + 1 }}</mat-card-title>
-            <button mat-icon-button color="warn" type="button" (click)="removeQuestion(qIndex)">
+            <button mat-icon-button color="warn" type="button" (click)="removeQuestion(qIndex)" [disabled]="hasResponses">
               <mat-icon>delete</mat-icon>
             </button>
           </mat-card-header>
@@ -140,7 +147,7 @@
     }
 
     <div class="actions">
-      <button mat-flat-button color="accent" type="button" (click)="addQuestion()">
+      <button mat-flat-button color="accent" type="button" (click)="addQuestion()" [disabled]="hasResponses">
         <mat-icon>add</mat-icon> Dodaj kolejne pytanie
       </button>
 

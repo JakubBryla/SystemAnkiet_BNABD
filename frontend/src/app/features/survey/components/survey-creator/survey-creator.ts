@@ -59,6 +59,8 @@ export class SurveyCreator implements OnInit {
   surveyForm!: FormGroup;
   isSaving = false;
   saveError: string | null = null;
+  hasResponses = false;
+  responseCount = 0;
 
   ngOnInit() {
     this.surveyForm = this.fb.group({
@@ -74,6 +76,9 @@ export class SurveyCreator implements OnInit {
       // Wczytaj istniejącą ankietę z backendu
       this.http.get<any>(`${this.apiUrl}/${this.surveyId}/public`).subscribe({
         next: (data) => {
+          this.hasResponses = data.hasResponses ?? false;
+          this.responseCount = data.responseCount ?? 0;
+
           this.surveyForm.patchValue({
             title: data.title,
             description: data.description ?? '',

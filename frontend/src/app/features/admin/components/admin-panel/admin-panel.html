@@ -2,98 +2,115 @@
   <div class="admin-header">
     <div class="header-text">
       <h1>Panel Administratora</h1>
-      <p>Zarządzaj uprawnieniami pracowników w systemie.</p>
+      <p>Zarządzaj uprawnieniami użytkowników w systemie.</p>
     </div>
   </div>
 
-  <div class="filters-toolbar">
-    <mat-form-field appearance="outline" class="filter-search">
-      <mat-label>Wyszukaj osobę...</mat-label>
-      <mat-icon matPrefix>search</mat-icon>
-      <input matInput [(ngModel)]="searchQuery" (ngModelChange)="pageIndex = 0" placeholder="Imię, nazwisko lub e-mail">
-    </mat-form-field>
+  @if (isLoading) {
+    <div style="display: flex; justify-content: center; padding: 48px;">
+      <mat-spinner></mat-spinner>
+    </div>
+  } @else if (errorMessage) {
+    <mat-card style="margin: 24px auto; max-width: 500px; text-align: center;">
+      <mat-card-content>
+        <mat-icon color="warn" style="font-size: 40px; width: 40px; height: 40px;">error_outline</mat-icon>
+        <p>{{ errorMessage }}</p>
+      </mat-card-content>
+    </mat-card>
+  } @else {
 
-    <mat-form-field appearance="outline" class="filter-select">
-      <mat-label>Filtruj po roli</mat-label>
-      <mat-select [(ngModel)]="filterRole" (ngModelChange)="pageIndex = 0">
-        <mat-option value="all">Wszyscy</mat-option>
-        <mat-option value="ADMIN">Administratorzy</mat-option>
-        <mat-option value="SURVEYOR">Ankieterzy (Twórcy)</mat-option>
-        <mat-option value="RESPONDENT">Pracownicy (Respondenci)</mat-option>
-      </mat-select>
-    </mat-form-field>
+    <div class="filters-toolbar">
+      <mat-form-field appearance="outline" class="filter-search">
+        <mat-label>Wyszukaj użytkownika...</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput [(ngModel)]="searchQuery" (ngModelChange)="pageIndex = 0" placeholder="Imię, nazwisko, e-mail lub domena">
+      </mat-form-field>
 
-    <div class="sort-group">
       <mat-form-field appearance="outline" class="filter-select">
-        <mat-label>Sortuj według</mat-label>
-        <mat-select [(ngModel)]="sortBy" (ngModelChange)="pageIndex = 0">
-          <mat-option value="lastName">Nazwiska</mat-option>
-          <mat-option value="email">Adresu E-mail</mat-option>
-          <mat-option value="role">Roli</mat-option>
+        <mat-label>Filtruj po roli</mat-label>
+        <mat-select [(ngModel)]="filterRole" (ngModelChange)="pageIndex = 0">
+          <mat-option value="all">Wszyscy</mat-option>
+          <mat-option value="ADMIN">Administratorzy</mat-option>
+          <mat-option value="USER">Użytkownicy</mat-option>
         </mat-select>
       </mat-form-field>
-      
-      <button mat-icon-button (click)="sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'; pageIndex = 0" class="sort-dir-btn" color="primary">
-        <mat-icon>{{ sortDirection === 'asc' ? 'arrow_downward' : 'arrow_upward' }}</mat-icon>
-      </button>
-    </div>
-  </div>
 
-  <div class="users-list">
-    @for (user of paginatedUsers; track user.id) {
-      <mat-card class="user-row">
-        <mat-card-content class="row-content">
-          
-          <div class="user-info">
-            <div class="avatar">
-              <mat-icon>person</mat-icon>
-            </div>
-            <div class="details">
-              <span class="name">{{ user.firstName }} {{ user.lastName }}</span>
-              <span class="email">{{ user.email }}</span>
-            </div>
-          </div>
+      <div class="sort-group">
+        <mat-form-field appearance="outline" class="filter-select">
+          <mat-label>Sortuj według</mat-label>
+          <mat-select [(ngModel)]="sortBy" (ngModelChange)="pageIndex = 0">
+            <mat-option value="name">Nazwy</mat-option>
+            <mat-option value="email">Adresu E-mail</mat-option>
+            <mat-option value="domain">Domeny</mat-option>
+            <mat-option value="role">Roli</mat-option>
+          </mat-select>
+        </mat-form-field>
 
-          <div class="user-role">
-            <mat-chip class="role-chip" [ngClass]="user.role.toLowerCase()">
-              @if (user.role === 'RESPONDENT') { Pracownik (Respondent) }
-              @if (user.role === 'SURVEYOR') { Ankieter (Twórca) }
-              @if (user.role === 'ADMIN') { Administrator }
-            </mat-chip>
-          </div>
-
-          <div class="user-actions">
-            @if (user.role !== 'ADMIN') {
-              <button 
-                mat-flat-button 
-                [color]="user.role === 'RESPONDENT' ? 'accent' : 'warn'"
-                (click)="toggleSurveyorRole(user.id)">
-                <mat-icon>{{ user.role === 'RESPONDENT' ? 'admin_panel_settings' : 'remove_moderator' }}</mat-icon>
-                {{ user.role === 'RESPONDENT' ? 'Nadaj uprawnienia Ankietera' : 'Odbierz uprawnienia' }}
-              </button>
-            } @else {
-              <button mat-button disabled>Brak akcji</button>
-            }
-          </div>
-
-        </mat-card-content>
-      </mat-card>
-    } @empty {
-      <div class="empty-state">
-        <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: var(--mat-sys-outline);">group_off</mat-icon>
-        <h3 style="margin-top: 16px;">Brak wyników</h3>
-        <p>Nie znaleziono użytkowników pasujących do kryteriów.</p>
+        <button mat-icon-button (click)="sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'; pageIndex = 0" class="sort-dir-btn" color="primary">
+          <mat-icon>{{ sortDirection === 'asc' ? 'arrow_downward' : 'arrow_upward' }}</mat-icon>
+        </button>
       </div>
-    }
-  </div>
+    </div>
 
-  @if (processedUsers.length > 0) {
-    <mat-paginator 
-      [length]="processedUsers.length"
-      [pageSize]="pageSize"
-      [pageSizeOptions]="[5, 10, 25]"
-      (page)="onPageChange($event)"
-      class="custom-paginator">
-    </mat-paginator>
+    <div class="users-list">
+      @for (user of paginatedUsers; track user.id) {
+        <mat-card class="user-row">
+          <mat-card-content class="row-content">
+
+            <div class="user-info">
+              <div class="avatar">
+                <mat-icon>{{ user.role === 'ADMIN' ? 'admin_panel_settings' : 'person' }}</mat-icon>
+              </div>
+              <div class="details">
+                @if (user.firstName || user.lastName) {
+                  <span class="name">{{ user.firstName }} {{ user.lastName }}</span>
+                  <span class="email">{{ user.email }}</span>
+                } @else {
+                  <span class="name">{{ user.email }}</span>
+                  @if (user.domain) {
+                    <span class="email">Domena: {{ user.domain }}</span>
+                  }
+                }
+              </div>
+            </div>
+
+            <div class="user-role">
+              <mat-chip class="role-chip" [ngClass]="user.role.toLowerCase()">
+                @if (user.role === 'ADMIN') { Administrator }
+                @if (user.role === 'USER') { Użytkownik }
+              </mat-chip>
+            </div>
+
+            <div class="user-actions">
+              <button
+                mat-flat-button
+                [color]="user.role === 'USER' ? 'accent' : 'warn'"
+                (click)="toggleRole(user.id)">
+                <mat-icon>{{ user.role === 'USER' ? 'upgrade' : 'remove_moderator' }}</mat-icon>
+                {{ user.role === 'USER' ? 'Nadaj uprawnienia admina' : 'Odbierz uprawnienia' }}
+              </button>
+            </div>
+
+          </mat-card-content>
+        </mat-card>
+      } @empty {
+        <div class="empty-state">
+          <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: var(--mat-sys-outline);">group_off</mat-icon>
+          <h3 style="margin-top: 16px;">Brak wyników</h3>
+          <p>Nie znaleziono użytkowników pasujących do kryteriów.</p>
+        </div>
+      }
+    </div>
+
+    @if (processedUsers.length > 0) {
+      <mat-paginator
+        [length]="processedUsers.length"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[5, 10, 25]"
+        (page)="onPageChange($event)"
+        class="custom-paginator">
+      </mat-paginator>
+    }
+
   }
 </div>

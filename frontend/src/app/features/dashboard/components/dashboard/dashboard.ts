@@ -55,6 +55,7 @@ export class Dashboard implements OnInit {
   private apiUrl = 'http://localhost:8080/api/surveys';
 
   surveys: SurveySummary[] = [];
+  assignedSurveys: SurveySummary[] = [];
 
   searchQuery = '';
   sortBy: 'title' | 'status' | 'accessType' = 'title';
@@ -75,6 +76,14 @@ export class Dashboard implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Błąd ładowania ankiet:', err)
+    });
+
+    this.http.get<any[]>(`${this.apiUrl}/assigned`).subscribe({
+      next: (data) => {
+        this.assignedSurveys = data.map(s => this.mapToSummary(s));
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Błąd ładowania przypisanych ankiet:', err)
     });
   }
 

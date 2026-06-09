@@ -39,10 +39,6 @@ public class Question {
     @Column(name = "expected_value")
     private String expectedValue;
 
-    // Akcja gdy odpowiedź nie zgadza się z expected_value: WARNING, UNRELIABLE, BLOCK
-    @Column(name = "fail_status")
-    private String failStatus;
-
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderColumn(name = "option_order")
     private List<AnswerOption> options = new ArrayList<>();
