@@ -5,6 +5,7 @@ import { Dashboard } from './features/dashboard/components/dashboard/dashboard';
 import { SurveyFiller } from './features/survey/components/survey-filler/survey-filler';
 import { SurveyCreator } from './features/survey/components/survey-creator/survey-creator';
 import { authGuard } from './features/auth/guards/auth-guard';
+import { RespondentDashboard } from './features/dashboard/components/respondent-dashboard/respondent-dashboard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -16,6 +17,7 @@ export const routes: Routes = [
     component: Dashboard,
     canActivate: [authGuard] 
   },
+  { path: 'my-surveys', component: RespondentDashboard },
   { 
     path: 'survey/:id/edit', 
     component: SurveyCreator,

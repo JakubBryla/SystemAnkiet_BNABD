@@ -13,13 +13,24 @@
         
         <mat-card-header class="card-header-with-menu">
           <div class="header-content">
+            @if (survey.organizationName) {
+              <span class="organization-label">{{ survey.organizationName }}</span>
+            }
+            
             <mat-card-title>{{ survey.title }}</mat-card-title>
             
-            <mat-chip class="status-chip" [ngClass]="survey.status">
-              @if (survey.status === 'draft') { Szkic }
-              @if (survey.status === 'active') { Aktywna }
-              @if (survey.status === 'closed') { Zamknięta }
-            </mat-chip>
+            <div class="chips-container">
+              <mat-chip class="status-chip" [ngClass]="survey.status">
+                @if (survey.status === 'draft') { Szkic }
+                @if (survey.status === 'active') { Aktywna }
+                @if (survey.status === 'closed') { Zamknięta }
+              </mat-chip>
+
+              <mat-chip class="access-chip" [ngClass]="survey.accessType.toLowerCase()">
+                @if (survey.accessType === 'INTERNAL') { Wewnętrzna (Pracownicy) }
+                @if (survey.accessType === 'EXTERNAL') { Zewnętrzna (Klienci) }
+              </mat-chip>
+            </div>
           </div>
 
           <button mat-icon-button [matMenuTriggerFor]="menu" class="menu-btn">

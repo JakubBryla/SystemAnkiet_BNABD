@@ -89,3 +89,33 @@ h2 {
   display: flex;
   justify-content: flex-end; /* Wyrównanie do prawej */
 }
+
+.section-divider {
+  margin: 24px 0;
+}
+
+.access-settings-section {
+  padding: 8px 0;
+
+  .section-title {
+    margin: 0 0 4px 0;
+    font-size: 1.1rem;
+    color: var(--mat-sys-on-surface);
+  }
+
+  .section-subtitle {
+    margin: 0 0 16px 0;
+    font-size: 0.85rem;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.access-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  
+  mat-radio-button {
+    margin-left: -8px; /* Wyrównanie kółka do lewej krawędzi tekstu */
+  }
+}

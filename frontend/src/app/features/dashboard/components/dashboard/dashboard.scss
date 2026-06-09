@@ -90,3 +90,36 @@
     color: #c5221f !important; 
   }
 }
+
+/* Mały podpis organizacji nad tytułem */
+.organization-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--mat-sys-on-surface-variant);
+  font-weight: 600;
+  margin-bottom: -4px;
+}
+
+/* Kontener na etykiety */
+.chips-container {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+/* Kolory dla typów dostępu */
+.access-chip {
+  font-weight: 500;
+  
+  &.external {
+    background-color: #e8f0fe !important; 
+    color: #1a73e8 !important; 
+  }
+  
+  &.internal {
+    background-color: #f3e5f5 !important; 
+    color: #8e24aa !important; 
+  }
+}

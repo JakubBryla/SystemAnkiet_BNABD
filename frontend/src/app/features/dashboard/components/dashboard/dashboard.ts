@@ -16,6 +16,8 @@ export interface SurveySummary {
   title: string;
   description: string;
   status: 'draft' | 'active' | 'closed';
+  accessType: 'INTERNAL' | 'EXTERNAL'; 
+  organizationName?: string;
 }
 
 @Component({
@@ -39,9 +41,30 @@ export class Dashboard {
   private cdr = inject(ChangeDetectorRef);
   // mock baza danych ankiet na potrzeby frontendu
   surveys: SurveySummary[] = [
-    { id: 1, title: 'Badanie satysfakcji z pracy w IT', description: 'Anonimowa ankieta dla programistów.', status: 'draft' },
-    { id: 2, title: 'Ulubione frameworki 2026', description: 'Głosowanie na najlepsze narzędzia.', status: 'active' },
-    { id: 3, title: 'Zapotrzebowanie na szkolenia', description: 'Ankieta wewnętrzna dla firmy.', status: 'closed' }
+    { 
+      id: 1, 
+      title: 'Satysfakcja z pakietu medycznego 2026', 
+      description: 'Badanie wewnętrzne dla pracowników pionu logistyki.', 
+      status: 'draft',
+      accessType: 'INTERNAL',
+      organizationName: 'ORLEN S.A.'
+    },
+    { 
+      id: 2, 
+      title: 'Opinia o paliwach VERVA i Stop Cafe', 
+      description: 'Ogólnopolskie badanie opinii konsumentów i kierowców.', 
+      status: 'active',
+      accessType: 'EXTERNAL',
+      organizationName: 'ORLEN S.A.'
+    },
+    { 
+      id: 3, 
+      title: 'Badanie komunikacji wewnętrznej', 
+      description: 'Ankieta oceniająca nowy intranet firmowy.', 
+      status: 'closed',
+      accessType: 'INTERNAL',
+      organizationName: 'ORLEN S.A.'
+    }
   ];
 
   changeSurveyStatus(survey: SurveySummary, newStatus: 'draft' | 'active' | 'closed') {
@@ -70,7 +93,9 @@ export class Dashboard {
             id: newId,
             title: result,
             description: '',
-            status: 'draft'
+            status: 'draft',
+            accessType: 'EXTERNAL', 
+            organizationName: 'ORLEN S.A.' 
           }
         ];
         this.cdr.detectChanges();

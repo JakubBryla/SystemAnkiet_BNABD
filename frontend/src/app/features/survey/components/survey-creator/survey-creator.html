@@ -10,6 +10,24 @@
           <input matInput formControlName="title" placeholder="np. Badanie zadowolenia">
         </mat-form-field>
         
+        <mat-divider class="section-divider"></mat-divider>
+
+        <div class="access-settings-section">
+          <h3 class="section-title">Dystrybucja i dostęp do ankiety</h3>
+          <p class="section-subtitle">Wybierz, do kogo skierowane jest to badanie (określa wymagania autoryzacji).</p>
+          
+          <mat-radio-group formControlName="accessType" class="access-radio-group">
+            <mat-radio-button value="EXTERNAL">
+              <strong>Zewnętrzna (Otwarta)</strong> - Publiczny link dla klientów i konsumentów (nie wymaga logowania).
+            </mat-radio-button>
+            <mat-radio-button value="INTERNAL">
+              <strong>Wewnętrzna (Zamknięta)</strong> - Skierowana do pracowników (wymaga uwierzytelnienia w organizacji).
+            </mat-radio-button>
+          </mat-radio-group>
+        </div>
+
+        <mat-divider class="section-divider"></mat-divider>
+
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Opis ankiety (opcjonalny)</mat-label>
           <textarea matInput formControlName="description" rows="2"></textarea>

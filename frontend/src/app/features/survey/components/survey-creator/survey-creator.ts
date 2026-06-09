@@ -9,6 +9,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatDividerModule } from '@angular/material/divider';
 
 export function atLeastOneQuestion(control: AbstractControl): ValidationErrors | null {
   return control.value && control.value.length > 0 ? null : { requireQuestion: true };
@@ -35,7 +37,9 @@ export const optionsValidator: ValidatorFn = (control: AbstractControl): Validat
     MatIconModule,
     MatSelectModule,
     MatSlideToggleModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatRadioModule,
+    MatDividerModule
   ],
   templateUrl: './survey-creator.html',
   styleUrl: './survey-creator.scss',
@@ -52,6 +56,7 @@ export class SurveyCreator implements OnInit {
     this.surveyForm = this.fb.group({
       title: ['', Validators.required],
       description: [''],
+      accessType: ['EXTERNAL', Validators.required],
       questions: this.fb.array([], atLeastOneQuestion) 
     });
 
