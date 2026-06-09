@@ -8,6 +8,8 @@ public class UserDto {
 
     private Long id;
     private String email;
+    private String firstName;
+    private String lastName;
     private String role;
     private String domain;
     private boolean active;
@@ -16,6 +18,8 @@ public class UserDto {
         UserDto dto = new UserDto();
         dto.setId(user.getId());
         dto.setEmail(user.getEmail());
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
         dto.setRole(user.getRole().name());
         dto.setDomain(user.getDomain());
         dto.setActive(user.isActive());
