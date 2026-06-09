@@ -19,6 +19,9 @@ public class SurveyDetailDto {
     private String status;
     private String type;
     private List<QuestionDto> questions;
+    // Czy ankieta ma już zapisane odpowiedzi — pytania są wtedy zablokowane do edycji
+    private boolean hasResponses;
+    private long responseCount;
 
     public static SurveyDetailDto fromEntity(Survey survey) {
         SurveyDetailDto dto = new SurveyDetailDto();

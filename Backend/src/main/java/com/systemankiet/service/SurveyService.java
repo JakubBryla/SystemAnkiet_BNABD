@@ -79,15 +79,12 @@ public class SurveyService {
 
         // Pytania można modyfikować tylko jeśli nie ma jeszcze żadnych odpowiedzi.
         // Usunięcie pytań z istniejącymi odpowiedziami naruszyłoby FK response_answers.question_id.
-        if (responseRepository.existsBySurvey(survey)) {
-            throw new IllegalArgumentException(
-                "Nie można modyfikować pytań ankiety, która ma już zapisane odpowiedzi. " +
-                "Możliwe jest tylko zamknięcie ankiety."
-            );
+        if (!responseRepository.existsBySurvey(survey)) {
+            survey.getQuestions().clear();
+            survey.getQuestions().addAll(buildQuestions(request.getQuestions(), survey));
         }
-
-        survey.getQuestions().clear();
-        survey.getQuestions().addAll(buildQuestions(request.getQuestions(), survey));
+        // Jeśli odpowiedzi istnieją — metadata (tytuł/opis/typ) zostaje zaktualizowana,
+        // a pytania pozostają bez zmian (zablokowane ze względu na spójność danych).
 
         return SurveyDto.fromEntity(surveyRepository.save(survey));
     }
@@ -108,7 +105,11 @@ public class SurveyService {
         // Zwraca ankietę niezależnie od statusu - frontend sam obsługuje stany draft/closed/active
         Survey survey = surveyRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Ankieta nie znaleziona"));
-        return SurveyDetailDto.fromEntity(survey);
+        SurveyDetailDto dto = SurveyDetailDto.fromEntity(survey);
+        long count = responseRepository.countBySurvey(survey);
+        dto.setHasResponses(count > 0);
+        dto.setResponseCount(count);
+        return dto;
     }
 
     @Transactional

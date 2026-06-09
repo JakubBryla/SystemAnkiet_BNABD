@@ -1,5 +1,7 @@
 package com.systemankiet.service;
 
+import com.systemankiet.dto.AnswerDetailDto;
+import com.systemankiet.dto.ResponseDetailDto;
 import com.systemankiet.dto.ResponseDto;
 import com.systemankiet.dto.SubmitResponseRequest;
 import com.systemankiet.entity.Question;
@@ -19,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +29,22 @@ public class ResponseService {
 
     private final SurveyRepository surveyRepository;
     private final SurveyResponseRepository responseRepository;
+
+    @Transactional(readOnly = true)
+    public List<ResponseDetailDto> getResponses(Long surveyId, User currentUser) {
+        Survey survey = surveyRepository.findById(surveyId)
+                .orElseThrow(() -> new NoSuchElementException("Ankieta nie znaleziona"));
+
+        // Tylko twórca ankiety może przeglądać odpowiedzi
+        if (!survey.getCreatedBy().getId().equals(currentUser.getId())) {
+            throw new IllegalArgumentException("Brak uprawnien do przeglądania odpowiedzi tej ankiety");
+        }
+
+        return responseRepository.findBySurveyOrderBySubmittedAtDesc(survey)
+                .stream()
+                .map(ResponseDetailDto::fromEntity)
+                .collect(Collectors.toList());
+    }
 
     @Transactional
     public ResponseDto submitResponse(Long surveyId, SubmitResponseRequest request, User currentUser) {

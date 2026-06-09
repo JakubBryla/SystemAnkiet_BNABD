@@ -13,4 +13,6 @@ public interface SurveyResponseRepository extends JpaRepository<SurveyResponse, 
     List<SurveyResponse> findBySurveyOrderBySubmittedAtDesc(Survey survey);
 
     boolean existsBySurvey(Survey survey);
+
+    long countBySurvey(Survey survey);
 }
