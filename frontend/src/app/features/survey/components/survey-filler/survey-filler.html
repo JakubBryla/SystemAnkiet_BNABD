@@ -8,6 +8,22 @@
       </div>
     }
 
+    @case ('access-denied') {
+      <mat-card class="message-card">
+        <mat-card-header>
+          <div mat-card-avatar><mat-icon color="warn">block</mat-icon></div>
+          <mat-card-title>Brak dostępu</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Ta ankieta jest dostępna wyłącznie dla pracowników organizacji <strong>{{ accessDeniedDomain }}</strong>.</p>
+          <p>Twoje konto należy do innej domeny.</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button routerLink="/dashboard">Wróć do panelu</button>
+        </mat-card-actions>
+      </mat-card>
+    }
+
     @case ('login-required') {
       <mat-card class="message-card">
         <mat-card-header>

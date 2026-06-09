@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { timeout, TimeoutError } from 'rxjs';
@@ -34,12 +34,14 @@ export interface Survey {
   description: string;
   status: 'active' | 'closed' | 'draft';
   type: 'internal' | 'external';
+  creatorDomain: string | null;
   questions: Question[];
 }
 
 @Component({
   selector: 'app-survey-filler',
   imports: [
+    RouterModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -63,7 +65,8 @@ export class SurveyFiller implements OnInit {
   private surveyId!: string;
 
   survey: Survey | null = null;
-  viewState: 'loading' | 'active' | 'closed' | 'draft' | 'not-found' | 'submitted' | 'login-required' = 'loading';
+  viewState: 'loading' | 'active' | 'closed' | 'draft' | 'not-found' | 'submitted' | 'login-required' | 'access-denied' = 'loading';
+  accessDeniedDomain: string | null = null;
   errorMessage: string | null = null;
 
   answersForm!: FormGroup;
@@ -81,6 +84,7 @@ export class SurveyFiller implements OnInit {
             description: data.description ?? '',
             status: data.status,
             type: data.type ?? 'external',
+            creatorDomain: data.creatorDomain ?? null,
             questions: (data.questions ?? []).map((q: any) => ({
               id: q.id,
               text: q.text,
@@ -92,12 +96,29 @@ export class SurveyFiller implements OnInit {
             }))
           };
 
-          // Ankieta wewnętrzna — wymaga zalogowanego użytkownika
-          if (this.survey.type === 'internal' && !localStorage.getItem('token')) {
-            sessionStorage.setItem('loginReturnUrl', `/s/${this.surveyId}`);
-            this.viewState = 'login-required';
-            this.cdr.detectChanges();
-            return;
+          // Ankieta wewnętrzna — sprawdź logowanie i domenę
+          if (this.survey.type === 'internal') {
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+              // Niezalogowany — zapisz returnUrl i pokaż ekran logowania
+              sessionStorage.setItem('loginReturnUrl', `/s/${this.surveyId}`);
+              this.viewState = 'login-required';
+              this.cdr.detectChanges();
+              return;
+            }
+
+            // Zalogowany — sprawdź domenę
+            const userEmail = localStorage.getItem('email') ?? '';
+            const userDomain = userEmail.includes('@') ? userEmail.split('@')[1].toLowerCase() : '';
+            const surveyDomain = (this.survey.creatorDomain ?? '').toLowerCase();
+
+            if (surveyDomain && userDomain !== surveyDomain) {
+              this.accessDeniedDomain = this.survey.creatorDomain;
+              this.viewState = 'access-denied';
+              this.cdr.detectChanges();
+              return;
+            }
           }
 
           this.viewState = this.survey.status;
