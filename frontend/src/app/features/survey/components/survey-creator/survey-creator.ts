@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, DestroyRef } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -12,6 +12,7 @@ import { ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatDividerModule } from '@angular/material/divider';
 import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 
 export function atLeastOneQuestion(control: AbstractControl): ValidationErrors | null {
@@ -52,7 +53,7 @@ export class SurveyCreator implements OnInit {
   private fb = inject(FormBuilder); 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  
+  private destroyRef = inject(DestroyRef);
   surveyForm!: FormGroup;
 
   ngOnInit() {
@@ -94,18 +95,18 @@ export class SurveyCreator implements OnInit {
       expectedValue: [''] 
     }, { validators: optionsValidator });
     
-    questionForm.get('isControlQuestion')?.valueChanges.subscribe(isControl => {
-      const expectedValueControl = questionForm.get('expectedValue');
-      if (isControl) {
-        // włączone -> odpowiedź absolutnie wymagana
-        expectedValueControl?.setValidators([Validators.required]);
-      } else {
-        // wyłączone -> zdejmujemy wymóg i ewentualnie czyścimy pole
-        expectedValueControl?.clearValidators();
-        expectedValueControl?.setValue('');
-      }
-      expectedValueControl?.updateValueAndValidity();
-    });
+    questionForm.get('isControlQuestion')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(isControl => {
+        const expectedValueControl = questionForm.get('expectedValue');
+        if (isControl) {
+          expectedValueControl?.setValidators([Validators.required]);
+        } else {
+          expectedValueControl?.clearValidators();
+          expectedValueControl?.setValue('');
+        }
+        expectedValueControl?.updateValueAndValidity();
+      });
 
     this.questions.push(questionForm);
   }
@@ -119,8 +120,17 @@ export class SurveyCreator implements OnInit {
     this.getOptions(questionIndex).push(optionControl);
   }
 
-  removeOption(questionIndex: number, optionIndex: number) {
-    this.getOptions(questionIndex).removeAt(optionIndex);
+  removeOption(qIndex: number, optIndex: number) {
+    const question = this.questions.at(qIndex);
+    const options = question.get('options') as FormArray;
+    const expectedValueCtrl = question.get('expectedValue');
+    const removedValue = options.at(optIndex).value;
+    
+    if (expectedValueCtrl?.value === removedValue) {
+      expectedValueCtrl?.setValue('');
+    }
+    
+    options.removeAt(optIndex);
   }
 
   saveSurvey() {

@@ -22,7 +22,6 @@ export interface SurveySummary {
   description: string;
   status: 'draft' | 'active' | 'closed';
   accessType: 'INTERNAL' | 'EXTERNAL'; 
-  organizationName?: string;
 }
 
 @Component({
@@ -56,24 +55,21 @@ export class Dashboard {
       title: 'Satysfakcja z pakietu medycznego 2026', 
       description: 'Badanie wewnętrzne dla pracowników pionu logistyki.', 
       status: 'draft',
-      accessType: 'INTERNAL',
-      organizationName: 'ORLEN S.A.'
+      accessType: 'INTERNAL'
     },
     { 
       id: 2, 
       title: 'Opinia o paliwach VERVA i Stop Cafe', 
       description: 'Ogólnopolskie badanie opinii konsumentów i kierowców.', 
       status: 'active',
-      accessType: 'EXTERNAL',
-      organizationName: 'ORLEN S.A.'
+      accessType: 'EXTERNAL'
     },
     { 
       id: 3, 
       title: 'Badanie komunikacji wewnętrznej', 
       description: 'Ankieta oceniająca nowy intranet firmowy.', 
       status: 'closed',
-      accessType: 'INTERNAL',
-      organizationName: 'ORLEN S.A.'
+      accessType: 'INTERNAL'
     }
   ];
 
@@ -104,8 +100,7 @@ export class Dashboard {
             title: result,
             description: '',
             status: 'draft',
-            accessType: 'EXTERNAL', 
-            organizationName: 'ORLEN S.A.' 
+            accessType: 'EXTERNAL'
           }
         ];
         this.cdr.detectChanges();
@@ -169,7 +164,7 @@ export class Dashboard {
     });
 
     // Sortowanie
-    result.sort((a, b) => {
+    [...result].sort((a, b) => {
       let comp = 0;
       if (this.sortBy === 'title') {
         comp = a.title.localeCompare(b.title);

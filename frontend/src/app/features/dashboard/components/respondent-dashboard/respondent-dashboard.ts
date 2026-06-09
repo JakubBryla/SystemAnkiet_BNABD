@@ -54,7 +54,7 @@ export class RespondentDashboard {
       s.title.toLowerCase().includes(this.searchQuery.toLowerCase())
     );
 
-    result.sort((a, b) => {
+    [...result].sort((a, b) => {
       const comp = a.title.localeCompare(b.title);
       return this.sortDirection === 'asc' ? comp : -comp;
     });

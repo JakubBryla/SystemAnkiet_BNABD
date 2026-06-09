@@ -96,14 +96,14 @@
                 Pytanie wymagane
               </mat-slide-toggle>
 
-              @if (question.get('type')?.value !== 'short-answer') {
+              @if (question.get('type')?.value === 'single-choice') {
                 <mat-slide-toggle formControlName="isControlQuestion" color="accent" class="wrap-toggle">
                   Oznacz jako pytanie kontrolne (Attention Check)
                 </mat-slide-toggle>
               }
             </div>
 
-            @if (question.get('type')?.value !== 'short-answer' && question.get('isControlQuestion')?.value) {
+            @if (question.get('type')?.value === 'single-choice' && question.get('isControlQuestion')?.value) {
               <div class="expected-value-container">
                 <mat-form-field appearance="outline" class="expected-value-field" subscriptSizing="dynamic">
                   <mat-label>Oczekiwana odpowiedź (zaznacz poprawną)</mat-label>
