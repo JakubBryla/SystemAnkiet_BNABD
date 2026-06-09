@@ -103,5 +103,11 @@ export class AdminPanel {
         return user;
       })
     );
+
+    // Obliczamy maksymalny dozwolony indeks strony na podstawie NOWEGO zestawu danych
+    const maxPageIndex = Math.max(0, Math.ceil(this.processedUsers.length / this.pageSize) - 1);
+    if (this.pageIndex > maxPageIndex) {
+      this.pageIndex = maxPageIndex;
+    }
   }
 }
