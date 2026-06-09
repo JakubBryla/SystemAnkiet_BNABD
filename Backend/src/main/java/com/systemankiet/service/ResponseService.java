@@ -65,10 +65,15 @@ public class ResponseService {
             if (surveyDomain == null || !surveyDomain.equalsIgnoreCase(userDomain)) {
                 throw new IllegalArgumentException("Brak dostepu – ankieta dostepna tylko dla uzytkownikow z domeny: " + surveyDomain);
             }
+            // Blokada duplikatów dla ankiet wewnętrznych
+            if (responseRepository.existsBySurveyAndRespondent(survey, currentUser)) {
+                throw new IllegalStateException("Ta ankieta została już przez Ciebie wypełniona");
+            }
         }
 
         SurveyResponse response = new SurveyResponse();
         response.setSurvey(survey);
+        response.setRespondent(currentUser); // null dla EXTERNAL — brak konta
 
         boolean flagged = false;
         String flagReason = null;

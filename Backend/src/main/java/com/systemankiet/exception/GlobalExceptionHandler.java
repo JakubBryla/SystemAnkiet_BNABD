@@ -38,6 +38,13 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error", Optional.ofNullable(ex.getMessage()).orElse("Bad Request")));
     }
 
+    // Duplikat wypełnienia ankiety
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalState(IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("error", Optional.ofNullable(ex.getMessage()).orElse("Conflict")));
+    }
+
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<Map<String, String>> handleNotFound(NoSuchElementException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)

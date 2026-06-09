@@ -22,6 +22,11 @@ public class SurveyResponse {
     @JoinColumn(name = "survey_id", nullable = false)
     private Survey survey;
 
+    // Zalogowany użytkownik który wypełnił ankietę (null dla ankiet EXTERNAL — brak konta)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "respondent_id")
+    private User respondent;
+
     @Column(name = "submitted_at")
     private LocalDateTime submittedAt;
 
