@@ -27,7 +27,6 @@ public class QuestionDto {
     // Pola pytania kontrolnego
     private Boolean isControlQuestion;
     private String expectedValue;  // oczekiwana poprawna odpowiedź
-    private String failStatus;     // WARNING / UNRELIABLE / BLOCK
 
     public static QuestionDto fromEntity(Question question) {
         QuestionDto dto = new QuestionDto();
@@ -37,7 +36,6 @@ public class QuestionDto {
         dto.setIsRequired(question.isRequired());
         dto.setIsControlQuestion(question.isControlQuestion());
         dto.setExpectedValue(question.getExpectedValue());
-        dto.setFailStatus(question.getFailStatus());
         dto.setOptions(
             question.getOptions().stream()
                 .map(opt -> opt.getOptionText())

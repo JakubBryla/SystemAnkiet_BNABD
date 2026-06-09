@@ -148,7 +148,6 @@ public class SurveyService {
             question.setRequired(Boolean.TRUE.equals(qDto.getIsRequired()));
             question.setControlQuestion(Boolean.TRUE.equals(qDto.getIsControlQuestion()));
             question.setExpectedValue(qDto.getExpectedValue());
-            question.setFailStatus(qDto.getFailStatus());
             question.setSurvey(survey);
             question.setOptions(new ArrayList<>());
 
