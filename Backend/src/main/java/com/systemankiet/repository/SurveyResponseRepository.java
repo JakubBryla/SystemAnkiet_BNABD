@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -23,7 +24,12 @@ public interface SurveyResponseRepository extends JpaRepository<SurveyResponse, 
 
     boolean existsBySurvey(Survey survey);
 
-    // Sprawdza czy zalogowany użytkownik już wypełnił daną ankietę (blokada duplikatów dla INTERNAL)
+    // Sprawdza czy użytkownik wypełnił ankietę PO danej dacie (bieżący okres aktywności).
+    // Używane zamiast existsBySurveyAndRespondent — pozwala na ponowne wypełnienie
+    // po zamknięciu i ponownym otwarciu ankiety (nowy okres = nowa lastActivatedAt).
+    boolean existsBySurveyAndRespondentAndSubmittedAtAfter(Survey survey, User respondent, LocalDateTime submittedAt);
+
+    // Fallback dla ankiet bez lastActivatedAt (starsze rekordy sprzed tej funkcji)
     boolean existsBySurveyAndRespondent(Survey survey, User respondent);
 
     long countBySurvey(Survey survey);

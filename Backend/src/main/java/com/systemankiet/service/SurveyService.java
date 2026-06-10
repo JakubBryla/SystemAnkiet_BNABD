@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -100,6 +101,13 @@ public class SurveyService {
 
         SurveyStatus newStatus = SurveyStatus.valueOf(request.getStatus().toUpperCase());
         survey.setStatus(newStatus);
+
+        // Każde przejście w ACTIVE zaczyna nowy "okres aktywności".
+        // Dzięki temu po zamknięciu i ponownym otwarciu ankiety respondenci
+        // mogą ją wypełnić ponownie — duplikaty sprawdzane są tylko w bieżącym okresie.
+        if (newStatus == SurveyStatus.ACTIVE) {
+            survey.setLastActivatedAt(LocalDateTime.now());
+        }
 
         return SurveyDto.fromEntity(surveyRepository.save(survey));
     }

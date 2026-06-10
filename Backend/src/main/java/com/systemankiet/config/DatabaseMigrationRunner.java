@@ -31,7 +31,8 @@ public class DatabaseMigrationRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         dropRoleCheckConstraints();
-        createUniqueResponseIndex();
+        addLastActivatedAtColumn();
+        dropUniqueResponseIndex();
     }
 
     private void dropRoleCheckConstraints() {
@@ -66,11 +67,42 @@ public class DatabaseMigrationRunner implements ApplicationRunner {
     }
 
     /**
-     * Tworzy filtrowany indeks unikalny (survey_id, respondent_id) WHERE respondent_id IS NOT NULL.
-     * Zapobiega race condition przy równoczesnych żądaniach wypełnienia tej samej ankiety.
-     * Ankiety EXTERNAL (respondent_id = NULL) nie są objęte constraintem — wiele odpowiedzi anonimowych jest OK.
+     * Dodaje kolumnę last_activated_at do tabeli surveys (jeśli jeszcze nie istnieje).
+     * Istniejące ankiety ACTIVE dostają wartość created_at jako rozsądny default —
+     * oznacza to że ich "okres aktywności" liczymy od momentu utworzenia,
+     * co zabezpiecza przed ponownym wypełnieniem przez tych samych użytkowników.
      */
-    private void createUniqueResponseIndex() {
+    private void addLastActivatedAtColumn() {
+        try {
+            List<Integer> exists = jdbcTemplate.queryForList(
+                    "SELECT 1 FROM sys.columns " +
+                    "WHERE object_id = OBJECT_ID('surveys') AND name = 'last_activated_at'",
+                    Integer.class
+            );
+            if (exists.isEmpty()) {
+                jdbcTemplate.execute(
+                        "ALTER TABLE surveys ADD last_activated_at DATETIME2 NULL"
+                );
+                // Ustaw rozsądny default dla istniejących aktywnych ankiet
+                jdbcTemplate.execute(
+                        "UPDATE surveys SET last_activated_at = created_at WHERE status = 'ACTIVE'"
+                );
+                log.info("=== Dodano kolumnę last_activated_at do tabeli surveys ===");
+            } else {
+                log.debug("Kolumna last_activated_at już istnieje — pomijam.");
+            }
+        } catch (Exception e) {
+            log.warn("Nie można dodać kolumny last_activated_at: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Usuwa filtrowany indeks unikalny (survey_id, respondent_id) jeśli istnieje.
+     * Indeks był potrzebny gdy każdy użytkownik mógł wypełnić ankietę tylko raz globalnie.
+     * Po wprowadzeniu lastActivatedAt duplikaty są kontrolowane aplikacyjnie per-okres-aktywności,
+     * więc unikalny indeks blokował by poprawne ponowne wypełnienia po ponownym otwarciu ankiety.
+     */
+    private void dropUniqueResponseIndex() {
         try {
             String indexName = "UQ_survey_responses_survey_respondent";
             List<Integer> exists = jdbcTemplate.queryForList(
@@ -78,19 +110,16 @@ public class DatabaseMigrationRunner implements ApplicationRunner {
                     "WHERE name = ? AND object_id = OBJECT_ID('survey_responses')",
                     Integer.class, indexName
             );
-
-            if (exists.isEmpty()) {
+            if (!exists.isEmpty()) {
                 jdbcTemplate.execute(
-                        "CREATE UNIQUE INDEX " + indexName +
-                        " ON survey_responses(survey_id, respondent_id)" +
-                        " WHERE respondent_id IS NOT NULL"
+                        "DROP INDEX [" + indexName + "] ON survey_responses"
                 );
-                log.info("=== Utworzono filtrowany indeks unikalny: {} ===", indexName);
+                log.info("=== Usunięto indeks unikalny {} (zastąpiony kontrolą per-okres-aktywności) ===", indexName);
             } else {
-                log.debug("Indeks {} już istnieje — pomijam.", indexName);
+                log.debug("Indeks {} nie istnieje — pomijam.", indexName);
             }
         } catch (Exception e) {
-            log.warn("Nie można utworzyć indeksu unikalnego na survey_responses: {}", e.getMessage());
+            log.warn("Nie można usunąć indeksu unikalnego na survey_responses: {}", e.getMessage());
         }
     }
 }

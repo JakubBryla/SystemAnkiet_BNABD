@@ -39,6 +39,13 @@ public class Survey {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    // Aktualizowana przy każdym przejściu w status ACTIVE.
+    // Służy do określenia "bieżącego okresu aktywności" — duplikaty sprawdzane są
+    // tylko wśród odpowiedzi złożonych po tej dacie, co pozwala na ponowne
+    // wypełnienie ankiety po jej zamknięciu i ponownym otwarciu.
+    @Column(name = "last_activated_at")
+    private LocalDateTime lastActivatedAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;

@@ -19,6 +19,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -67,8 +68,15 @@ public class ResponseService {
             if (surveyDomain == null || !surveyDomain.equalsIgnoreCase(userDomain)) {
                 throw new IllegalArgumentException("Brak dostepu – ankieta dostepna tylko dla uzytkownikow z domeny: " + surveyDomain);
             }
-            // Fast-path: sprawdź czy użytkownik już wypełnił (optymistyczna ścieżka)
-            if (responseRepository.existsBySurveyAndRespondent(survey, currentUser)) {
+            // Sprawdź czy użytkownik już wypełnił ankietę W BIEŻĄCYM OKRESIE AKTYWNOŚCI.
+            // Jeśli lastActivatedAt jest ustawione — sprawdzamy tylko odpowiedzi po tej dacie,
+            // co pozwala na ponowne wypełnienie po zamknięciu i ponownym otwarciu ankiety.
+            // Fallback na starsze rekordy (bez lastActivatedAt) — sprawdzamy wszystkie.
+            LocalDateTime since = survey.getLastActivatedAt();
+            boolean alreadySubmitted = (since != null)
+                    ? responseRepository.existsBySurveyAndRespondentAndSubmittedAtAfter(survey, currentUser, since)
+                    : responseRepository.existsBySurveyAndRespondent(survey, currentUser);
+            if (alreadySubmitted) {
                 throw new DuplicateSubmissionException("Ta ankieta została już przez Ciebie wypełniona");
             }
         }
@@ -118,13 +126,9 @@ public class ResponseService {
         try {
             return ResponseDto.fromEntity(responseRepository.save(response));
         } catch (DataIntegrityViolationException e) {
-            // Sprawdź czy naruszony constraint to nasz indeks unikalny (race condition),
-            // a nie inny błąd bazy (FK, NOT NULL, CHECK) który powinien dostać własny komunikat
-            String cause = e.getMostSpecificCause().getMessage();
-            if (cause != null && cause.contains("UQ_survey_responses_survey_respondent")) {
-                throw new DuplicateSubmissionException("Ta ankieta została już przez Ciebie wypełniona");
-            }
-            // Inny błąd bazy — przekazujemy dalej do GlobalExceptionHandler (409 z oryginalnym komunikatem)
+            // Unikalny indeks UQ_survey_responses_survey_respondent został usunięty
+            // (DatabaseMigrationRunner go dropuje) — ten catch obsługuje inne błędy bazy
+            // np. naruszenie FK lub NOT NULL, które powinny dostać własny komunikat.
             throw e;
         }
     }

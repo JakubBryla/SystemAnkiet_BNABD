@@ -36,6 +36,7 @@ export interface Survey {
   type: 'internal' | 'external';
   creatorDomain: string | null;
   questions: Question[];
+  lastActivatedAt: string | null;
 }
 
 @Component({
@@ -85,6 +86,7 @@ export class SurveyFiller implements OnInit {
             status: data.status,
             type: data.type ?? 'external',
             creatorDomain: data.creatorDomain ?? null,
+            lastActivatedAt: data.lastActivatedAt ?? null,
             questions: (data.questions ?? []).map((q: any) => ({
               id: q.id,
               text: q.text,
@@ -121,8 +123,12 @@ export class SurveyFiller implements OnInit {
             }
           }
 
-          // Sprawdź czy ankieta była już wypełniona (localStorage — dotyczy obu typów)
-          if (localStorage.getItem(`survey_submitted_${this.surveyId}`)) {
+          // Sprawdź czy ankieta była już wypełniona w tej przeglądarce.
+          // Klucz zawiera email użytkownika i datę ostatniej aktywacji ankiety:
+          //  - email: różni użytkownicy na tej samej przeglądarce nie blokują się nawzajem
+          //  - lastActivatedAt: po zamknięciu i ponownym otwarciu ankiety klucz się zmienia,
+          //    więc poprzednie wypełnienie nie blokuje nowego okresu aktywności
+          if (localStorage.getItem(this.getSubmittedKey())) {
             this.viewState = 'already-submitted';
             this.cdr.detectChanges();
             return;
@@ -186,6 +192,16 @@ export class SurveyFiller implements OnInit {
     control.markAsTouched();
   }
 
+  // Buduje unikalny klucz localStorage dla kombinacji: ankieta + użytkownik + okres aktywności.
+  // email    → różni użytkownicy na tej samej przeglądarce nie blokują się nawzajem
+  // lastActivatedAt → po zamknięciu i ponownym otwarciu ankiety klucz się zmienia,
+  //                   dzięki czemu stare wypełnienia nie blokują nowego okresu
+  private getSubmittedKey(): string {
+    const email = localStorage.getItem('email') ?? 'anonymous';
+    const activatedAt = this.survey?.lastActivatedAt ?? '';
+    return `survey_submitted_${this.surveyId}_${email}_${activatedAt}`;
+  }
+
   goToLogin() {
     sessionStorage.setItem('loginReturnUrl', `/s/${this.surveyId}`);
     this.router.navigate(['/login']);
@@ -211,14 +227,14 @@ export class SurveyFiller implements OnInit {
       next: () => {
         this.errorMessage = null;
         // Zapisz do localStorage żeby zapobiec ponownemu wypełnieniu
-        localStorage.setItem(`survey_submitted_${this.surveyId}`, '1');
+        localStorage.setItem(this.getSubmittedKey(), '1');
         this.viewState = 'submitted';
         this.cdr.detectChanges();
       },
       error: (err) => {
         if (err.status === 409) {
           // Ankieta już wypełniona (backend potwierdził dla INTERNAL)
-          localStorage.setItem(`survey_submitted_${this.surveyId}`, '1');
+          localStorage.setItem(this.getSubmittedKey(), '1');
           this.viewState = 'already-submitted';
           this.cdr.detectChanges();
           return;

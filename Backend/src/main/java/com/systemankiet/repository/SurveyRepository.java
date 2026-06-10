@@ -46,10 +46,18 @@ public interface SurveyRepository extends JpaRepository<Survey, Long> {
     );
 
     // Ankiety przypisane do uzytkownika: wewnetrzne, aktywne, z tej samej domeny,
-    // nie stworzone przez niego i jeszcze przez niego nie wypełnione
+    // nie stworzone przez niego i jeszcze nie wypełnione w BIEŻĄCYM okresie aktywności.
+    // Warunek NOT EXISTS sprawdza tylko odpowiedzi złożone PO lastActivatedAt (data ostatniego otwarcia).
+    // Dzięki temu po zamknięciu i ponownym otwarciu ankiety (nowe lastActivatedAt) respondent
+    // widzi ją ponownie na liście, mimo że wypełnił ją w poprzednim okresie.
+    // Fallback: gdy lastActivatedAt IS NULL (starsze rekordy) — zachowanie jak poprzednio
+    // (wyklucz jeśli wypełnił kiedykolwiek).
     @Query("SELECT s FROM Survey s WHERE s.type = :type AND s.status = :status " +
            "AND s.createdBy.domain = :domain AND s.createdBy <> :user " +
-           "AND NOT EXISTS (SELECT r FROM SurveyResponse r WHERE r.survey = s AND r.respondent = :user) " +
+           "AND NOT EXISTS (" +
+           "  SELECT r FROM SurveyResponse r WHERE r.survey = s AND r.respondent = :user " +
+           "  AND (s.lastActivatedAt IS NULL OR r.submittedAt > s.lastActivatedAt)" +
+           ") " +
            "ORDER BY s.createdAt DESC")
     List<Survey> findAssignedSurveys(
         @Param("type") SurveyType type,
