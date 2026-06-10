@@ -37,7 +37,7 @@ public class SurveyController {
     public ResponseEntity<Page<SurveyDto>> getUserSurveys(
             @AuthenticationPrincipal User user,
             @RequestParam(defaultValue = "0")    @Min(0)               int page,
-            @RequestParam(defaultValue = "6")    @Min(1) @Max(100)     int size,
+            @RequestParam(defaultValue = "6")    @Min(1) @Max(1000)    int size,
             @RequestParam(defaultValue = "")     String search,
             @RequestParam(defaultValue = "all")  String status,
             @RequestParam(defaultValue = "all")  String type,
