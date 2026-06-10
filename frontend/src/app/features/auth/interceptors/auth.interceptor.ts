@@ -1,8 +1,8 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { TRUSTED_API_HOSTS } from '../../../core/constants/api.constants';
+import { Auth } from '../services/auth';
 
 /**
  * Checks if the request URL is from a trusted API host
@@ -20,7 +20,7 @@ function isTrustedApiUrl(url: string): boolean {
 }
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const router = inject(Router);
+  const authService = inject(Auth);
   const token = localStorage.getItem('token');
 
   const cloned = (token && isTrustedApiUrl(req.url))
@@ -29,12 +29,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(cloned).pipe(
     catchError((err: HttpErrorResponse) => {
-      if (err.status === 401 && isTrustedApiUrl(req.url)) {
-        // Token wygasł lub użytkownik wylogował się w innej karcie
-        localStorage.removeItem('token');
-        localStorage.removeItem('email');
-        localStorage.removeItem('role');
-        router.navigate(['/login']);
+      // Łapiemy błąd 401 (Nieautoryzowany) oraz 403 (Zabroniony)
+      if ((err.status === 401 || err.status === 403) && isTrustedApiUrl(req.url)) {
+        console.warn('Odmowa dostępu z backendu (401/403). Wymuszam wylogowanie.');
+        
+        authService.logout();
       }
       return throwError(() => err);
     })
