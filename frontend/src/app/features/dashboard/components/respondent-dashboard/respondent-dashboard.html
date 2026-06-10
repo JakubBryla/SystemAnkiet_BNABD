@@ -52,12 +52,13 @@
             <p class="survey-description">{{ survey.description }}</p>
           </mat-card-content>
           <mat-card-actions class="card-actions">
-            <a mat-flat-button color="primary"
-               [routerLink]="['/s', survey.id]"
-               [attr.disabled]="survey.status !== 'active' ? true : null">
+            <!-- button zamiast <a> — [attr.disabled] na <a> jest ignorowane przez przeglądarki -->
+            <button mat-flat-button color="primary"
+               [routerLink]="survey.status === 'active' ? ['/s', survey.id] : null"
+               [disabled]="survey.status !== 'active'">
               <mat-icon>assignment</mat-icon>
               Wypełnij
-            </a>
+            </button>
           </mat-card-actions>
         </mat-card>
       } @empty {

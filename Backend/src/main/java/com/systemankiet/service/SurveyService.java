@@ -130,16 +130,24 @@ public class SurveyService {
 
     // --- Metody pomocnicze ---
 
-    // Parsuje filtr statusu — "all" lub null/pusty zwraca null (brak filtra)
+    // Parsuje filtr statusu — "all"/null/pusty → null (brak filtra); inna nieznana wartość → 400
     private SurveyStatus parseStatusFilter(String s) {
         if (s == null || s.isBlank() || "all".equalsIgnoreCase(s)) return null;
-        try { return SurveyStatus.valueOf(s.toUpperCase()); } catch (Exception e) { return null; }
+        try {
+            return SurveyStatus.valueOf(s.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Nieznany status: '" + s + "'. Dozwolone: all, draft, active, closed");
+        }
     }
 
-    // Parsuje filtr typu — "all" lub null/pusty zwraca null (brak filtra)
+    // Parsuje filtr typu — "all"/null/pusty → null (brak filtra); inna nieznana wartość → 400
     private SurveyType parseTypeFilter(String s) {
         if (s == null || s.isBlank() || "all".equalsIgnoreCase(s)) return null;
-        try { return SurveyType.valueOf(s.toUpperCase()); } catch (Exception e) { return null; }
+        try {
+            return SurveyType.valueOf(s.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Nieznany typ: '" + s + "'. Dozwolone: all, INTERNAL, EXTERNAL");
+        }
     }
 
     private SurveyType parseSurveyType(String typeStr) {

@@ -11,9 +11,11 @@ import com.systemankiet.entity.SurveyResponse;
 import com.systemankiet.entity.User;
 import com.systemankiet.enums.SurveyStatus;
 import com.systemankiet.enums.SurveyType;
+import com.systemankiet.exception.DuplicateSubmissionException;
 import com.systemankiet.repository.SurveyRepository;
 import com.systemankiet.repository.SurveyResponseRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,9 +67,9 @@ public class ResponseService {
             if (surveyDomain == null || !surveyDomain.equalsIgnoreCase(userDomain)) {
                 throw new IllegalArgumentException("Brak dostepu – ankieta dostepna tylko dla uzytkownikow z domeny: " + surveyDomain);
             }
-            // Blokada duplikatów dla ankiet wewnętrznych
+            // Fast-path: sprawdź czy użytkownik już wypełnił (optymistyczna ścieżka)
             if (responseRepository.existsBySurveyAndRespondent(survey, currentUser)) {
-                throw new IllegalStateException("Ta ankieta została już przez Ciebie wypełniona");
+                throw new DuplicateSubmissionException("Ta ankieta została już przez Ciebie wypełniona");
             }
         }
 
@@ -113,6 +115,13 @@ public class ResponseService {
         response.setFlagStatus(flagStatus);
         response.setAnswers(answers);
 
-        return ResponseDto.fromEntity(responseRepository.save(response));
+        try {
+            return ResponseDto.fromEntity(responseRepository.save(response));
+        } catch (DataIntegrityViolationException e) {
+            // Race condition: dwa równoczesne żądania przeszły fast-path check,
+            // ale filtrowany indeks unikalny (survey_id, respondent_id) na poziomie
+            // bazy danych blokuje drugi INSERT i gwarantuje atomowość
+            throw new DuplicateSubmissionException("Ta ankieta została już przez Ciebie wypełniona");
+        }
     }
 }

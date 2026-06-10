@@ -50,11 +50,14 @@ public class UserController {
         }
 
         String roleStr = body.get("role");
+        if (roleStr == null || roleStr.isBlank()) {
+            throw new IllegalArgumentException("Pole 'role' jest wymagane. Dozwolone wartości: USER, SURVEYOR, ADMIN");
+        }
         Role newRole;
         try {
-            newRole = Role.valueOf(roleStr.toUpperCase());
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Nieprawidłowa rola: " + roleStr + ". Dozwolone: USER, SURVEYOR, ADMIN");
+            newRole = Role.valueOf(roleStr.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Nieprawidłowa rola: '" + roleStr + "'. Dozwolone: USER, SURVEYOR, ADMIN");
         }
 
         user.setRole(newRole);

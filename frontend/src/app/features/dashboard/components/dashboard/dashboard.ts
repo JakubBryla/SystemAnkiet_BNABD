@@ -18,6 +18,18 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 
+// Struktura odpowiedzi Spring Data Page<T> zwracanej przez backend
+export interface PageResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
+}
+
 export interface SurveySummary {
   id: number;
   title: string;
@@ -92,7 +104,7 @@ export class Dashboard implements OnInit {
   private reloadSurveys() {
     if (!this.isAnkieterOrAdmin) return;
 
-    this.http.get<any>(this.apiUrl, {
+    this.http.get<PageResponse<any>>(this.apiUrl, {
       params: {
         page: this.pageIndex,
         size: this.pageSize,
@@ -104,7 +116,7 @@ export class Dashboard implements OnInit {
       }
     }).subscribe({
       next: (pageResult) => {
-        this.surveys = (pageResult.content as any[]).map(s => this.mapToSummary(s));
+        this.surveys = pageResult.content.map(s => this.mapToSummary(s));
         this.totalSurveys = pageResult.totalElements;
         this.cdr.detectChanges();
       },

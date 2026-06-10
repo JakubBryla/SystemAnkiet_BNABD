@@ -1,5 +1,6 @@
 package com.systemankiet.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -38,11 +39,21 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error", Optional.ofNullable(ex.getMessage()).orElse("Bad Request")));
     }
 
-    // Duplikat wypełnienia ankiety
-    @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<Map<String, String>> handleIllegalState(IllegalStateException ex) {
+    // Duplikat wypełnienia ankiety (domenowy wyjątek — precyzyjniejszy niż IllegalStateException)
+    @ExceptionHandler(DuplicateSubmissionException.class)
+    public ResponseEntity<Map<String, String>> handleDuplicateSubmission(DuplicateSubmissionException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(Map.of("error", Optional.ofNullable(ex.getMessage()).orElse("Conflict")));
+                .body(Map.of("error", Optional.ofNullable(ex.getMessage()).orElse("Ankieta już wypełniona")));
+    }
+
+    // Naruszenie @Min / @Max na parametrach żądania (@Validated w kontrolerach)
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, String>> handleConstraintViolation(ConstraintViolationException ex) {
+        String msg = ex.getConstraintViolations().stream()
+                .map(cv -> cv.getPropertyPath() + ": " + cv.getMessage())
+                .findFirst()
+                .orElse("Nieprawidłowe parametry żądania");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", msg));
     }
 
     @ExceptionHandler(NoSuchElementException.class)

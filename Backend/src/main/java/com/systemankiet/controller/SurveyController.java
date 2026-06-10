@@ -7,6 +7,8 @@ import com.systemankiet.dto.UpdateSurveyStatusRequest;
 import com.systemankiet.entity.User;
 import com.systemankiet.service.SurveyService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,11 +18,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
+@Validated
 @RestController
 @RequestMapping("/api/surveys")
 @RequiredArgsConstructor
@@ -33,8 +36,8 @@ public class SurveyController {
     @PreAuthorize("hasAnyRole('SURVEYOR', 'ADMIN')")
     public ResponseEntity<Page<SurveyDto>> getUserSurveys(
             @AuthenticationPrincipal User user,
-            @RequestParam(defaultValue = "0")    int page,
-            @RequestParam(defaultValue = "6")    int size,
+            @RequestParam(defaultValue = "0")    @Min(0)               int page,
+            @RequestParam(defaultValue = "6")    @Min(1) @Max(100)     int size,
             @RequestParam(defaultValue = "")     String search,
             @RequestParam(defaultValue = "all")  String status,
             @RequestParam(defaultValue = "all")  String type,
