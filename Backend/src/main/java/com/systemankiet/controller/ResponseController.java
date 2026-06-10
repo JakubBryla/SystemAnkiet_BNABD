@@ -8,6 +8,7 @@ import com.systemankiet.service.ResponseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,8 +21,9 @@ public class ResponseController {
 
     private final ResponseService responseService;
 
-    // Pobieranie odpowiedzi ankiety - tylko dla twórcy (wymaga logowania).
+    // Pobieranie odpowiedzi ankiety - tylko twórca (SURVEYOR/ADMIN)
     @GetMapping("/{id}/responses")
+    @PreAuthorize("hasAnyRole('SURVEYOR', 'ADMIN')")
     public ResponseEntity<List<ResponseDetailDto>> getResponses(
             @PathVariable Long id,
             @AuthenticationPrincipal User currentUser) {

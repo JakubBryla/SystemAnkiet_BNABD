@@ -14,6 +14,8 @@ import com.systemankiet.enums.SurveyType;
 import com.systemankiet.repository.SurveyRepository;
 import com.systemankiet.repository.SurveyResponseRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,12 +31,14 @@ public class SurveyService {
     private final SurveyRepository surveyRepository;
     private final SurveyResponseRepository responseRepository;
 
+    // Paginacja po stronie backendu z filtrami przekazanymi jako parametry zapytania
     @Transactional(readOnly = true)
-    public List<SurveyDto> getUserSurveys(User user) {
-        return surveyRepository.findByCreatedByOrderByCreatedAtDesc(user)
-                .stream()
-                .map(SurveyDto::fromEntity)
-                .collect(Collectors.toList());
+    public Page<SurveyDto> getUserSurveys(User user, String search, String statusStr, String typeStr, Pageable pageable) {
+        SurveyStatus status = parseStatusFilter(statusStr);
+        SurveyType type = parseTypeFilter(typeStr);
+        String searchTerm = (search == null) ? "" : search;
+        return surveyRepository.findByCreatedByWithFilters(user, searchTerm, status, type, pageable)
+                .map(SurveyDto::fromEntity);
     }
 
     // Ankiety wewnetrzne przypisane do zalogowanego uzytkownika (z tej samej domeny emaila)
@@ -102,8 +106,8 @@ public class SurveyService {
 
     @Transactional(readOnly = true)
     public SurveyDetailDto getPublicSurvey(Long id) {
-        // Zwraca ankietę niezależnie od statusu - frontend sam obsługuje stany draft/closed/active
-        Survey survey = surveyRepository.findById(id)
+        // N+1 fix: findByIdWithDetails uzywa JOIN FETCH — pytania i opcje ladowane w jednym zapytaniu
+        Survey survey = surveyRepository.findByIdWithDetails(id)
                 .orElseThrow(() -> new NoSuchElementException("Ankieta nie znaleziona"));
         SurveyDetailDto dto = SurveyDetailDto.fromEntity(survey);
         long count = responseRepository.countBySurvey(survey);
@@ -125,6 +129,26 @@ public class SurveyService {
     }
 
     // --- Metody pomocnicze ---
+
+    // Parsuje filtr statusu — "all"/null/pusty → null (brak filtra); inna nieznana wartość → 400
+    private SurveyStatus parseStatusFilter(String s) {
+        if (s == null || s.isBlank() || "all".equalsIgnoreCase(s)) return null;
+        try {
+            return SurveyStatus.valueOf(s.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Nieznany status: '" + s + "'. Dozwolone: all, draft, active, closed");
+        }
+    }
+
+    // Parsuje filtr typu — "all"/null/pusty → null (brak filtra); inna nieznana wartość → 400
+    private SurveyType parseTypeFilter(String s) {
+        if (s == null || s.isBlank() || "all".equalsIgnoreCase(s)) return null;
+        try {
+            return SurveyType.valueOf(s.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Nieznany typ: '" + s + "'. Dozwolone: all, INTERNAL, EXTERNAL");
+        }
+    }
 
     private SurveyType parseSurveyType(String typeStr) {
         if (typeStr == null || typeStr.isBlank()) return SurveyType.EXTERNAL;

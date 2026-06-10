@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
@@ -33,11 +34,12 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    // Przełącza rolę użytkownika: USER ↔ ADMIN — tylko dla admina
+    // Ustawia konkretną rolę użytkownika: USER / SURVEYOR / ADMIN — tylko dla admina
     @PatchMapping("/{id}/role")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserDto> toggleRole(
+    public ResponseEntity<UserDto> setRole(
             @PathVariable Long id,
+            @RequestBody Map<String, String> body,
             @AuthenticationPrincipal User currentAdmin) {
 
         User user = userRepository.findById(id)
@@ -47,7 +49,18 @@ public class UserController {
             throw new IllegalArgumentException("Nie można zmienić własnej roli");
         }
 
-        user.setRole(user.getRole() == Role.USER ? Role.ADMIN : Role.USER);
+        String roleStr = body.get("role");
+        if (roleStr == null || roleStr.isBlank()) {
+            throw new IllegalArgumentException("Pole 'role' jest wymagane. Dozwolone wartości: USER, SURVEYOR, ADMIN");
+        }
+        Role newRole;
+        try {
+            newRole = Role.valueOf(roleStr.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Nieprawidłowa rola: '" + roleStr + "'. Dozwolone: USER, SURVEYOR, ADMIN");
+        }
+
+        user.setRole(newRole);
         return ResponseEntity.ok(UserDto.fromEntity(userRepository.save(user)));
     }
 }

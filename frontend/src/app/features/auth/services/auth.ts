@@ -45,6 +45,8 @@ export class Auth {
         if (returnUrl) {
           sessionStorage.removeItem('loginReturnUrl');
           this.router.navigateByUrl(returnUrl);
+        } else if (response.role === 'USER') {
+          this.router.navigate(['/my-surveys']);
         } else {
           this.router.navigate(['/dashboard']);
         }

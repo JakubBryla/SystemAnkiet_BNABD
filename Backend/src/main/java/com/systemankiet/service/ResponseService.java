@@ -11,9 +11,11 @@ import com.systemankiet.entity.SurveyResponse;
 import com.systemankiet.entity.User;
 import com.systemankiet.enums.SurveyStatus;
 import com.systemankiet.enums.SurveyType;
+import com.systemankiet.exception.DuplicateSubmissionException;
 import com.systemankiet.repository.SurveyRepository;
 import com.systemankiet.repository.SurveyResponseRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,10 +67,15 @@ public class ResponseService {
             if (surveyDomain == null || !surveyDomain.equalsIgnoreCase(userDomain)) {
                 throw new IllegalArgumentException("Brak dostepu – ankieta dostepna tylko dla uzytkownikow z domeny: " + surveyDomain);
             }
+            // Fast-path: sprawdź czy użytkownik już wypełnił (optymistyczna ścieżka)
+            if (responseRepository.existsBySurveyAndRespondent(survey, currentUser)) {
+                throw new DuplicateSubmissionException("Ta ankieta została już przez Ciebie wypełniona");
+            }
         }
 
         SurveyResponse response = new SurveyResponse();
         response.setSurvey(survey);
+        response.setRespondent(currentUser); // null dla EXTERNAL — brak konta
 
         boolean flagged = false;
         String flagReason = null;
@@ -108,6 +115,17 @@ public class ResponseService {
         response.setFlagStatus(flagStatus);
         response.setAnswers(answers);
 
-        return ResponseDto.fromEntity(responseRepository.save(response));
+        try {
+            return ResponseDto.fromEntity(responseRepository.save(response));
+        } catch (DataIntegrityViolationException e) {
+            // Sprawdź czy naruszony constraint to nasz indeks unikalny (race condition),
+            // a nie inny błąd bazy (FK, NOT NULL, CHECK) który powinien dostać własny komunikat
+            String cause = e.getMostSpecificCause().getMessage();
+            if (cause != null && cause.contains("UQ_survey_responses_survey_respondent")) {
+                throw new DuplicateSubmissionException("Ta ankieta została już przez Ciebie wypełniona");
+            }
+            // Inny błąd bazy — przekazujemy dalej do GlobalExceptionHandler (409 z oryginalnym komunikatem)
+            throw e;
+        }
     }
 }

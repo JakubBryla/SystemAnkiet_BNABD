@@ -156,6 +156,18 @@
       </mat-card>
     }
 
+    @case ('already-submitted') {
+      <mat-card class="message-card">
+        <mat-card-header>
+          <div mat-card-avatar><mat-icon color="accent">how_to_vote</mat-icon></div>
+          <mat-card-title>Ankieta już wypełniona</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>Ta ankieta została już przez Ciebie wypełniona. Możesz wziąć udział tylko raz.</p>
+        </mat-card-content>
+      </mat-card>
+    }
+
     @default {
       <mat-card class="message-card">
         <mat-card-header>

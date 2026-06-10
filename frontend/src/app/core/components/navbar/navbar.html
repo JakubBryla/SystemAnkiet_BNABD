@@ -5,9 +5,13 @@
   
   <div class="nav-actions">
     @if (authService.isLoggedInSignal()) {
-      
-      <button mat-button routerLink="/dashboard">Panel główny</button>
-      
+
+      @if (authService.getRole() === 'USER') {
+        <button mat-button routerLink="/my-surveys">Moje Ankiety</button>
+      } @else {
+        <button mat-button routerLink="/dashboard">Panel główny</button>
+      }
+
       @if (authService.getRole() === 'ADMIN') {
         <button mat-button color="accent" routerLink="/admin">Panel Admina</button>
       }

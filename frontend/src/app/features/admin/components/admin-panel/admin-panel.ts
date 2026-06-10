@@ -18,7 +18,7 @@ export interface User {
   email: string;
   firstName: string | null;
   lastName: string | null;
-  role: 'USER' | 'ADMIN';
+  role: 'USER' | 'SURVEYOR' | 'ADMIN';
   domain: string | null;
   active: boolean;
 }
@@ -56,7 +56,7 @@ export class AdminPanel implements OnInit {
 
   // --- STANY FILTRÓW I PAGINACJI ---
   searchQuery = '';
-  filterRole: 'all' | 'USER' | 'ADMIN' = 'all';
+  filterRole: 'all' | 'USER' | 'SURVEYOR' | 'ADMIN' = 'all';
   sortBy: 'name' | 'email' | 'role' | 'domain' = 'email';
   sortDirection: 'asc' | 'desc' = 'asc';
 
@@ -90,6 +90,13 @@ export class AdminPanel implements OnInit {
     const fn = user.firstName?.trim() ?? '';
     const ln = user.lastName?.trim() ?? '';
     return (fn || ln) ? `${fn} ${ln}`.trim() : user.email;
+  }
+
+  /** Czytelna etykieta roli */
+  roleLabel(role: 'USER' | 'SURVEYOR' | 'ADMIN'): string {
+    if (role === 'ADMIN') return 'Administrator';
+    if (role === 'SURVEYOR') return 'Ankieter';
+    return 'Użytkownik';
   }
 
   // --- PRZETWARZANIE DANYCH ---
@@ -130,12 +137,11 @@ export class AdminPanel implements OnInit {
   }
 
   // --- AKCJE ---
-  toggleRole(userId: number) {
-    this.http.patch<User>(`${this.apiUrl}/${userId}/role`, {}).subscribe({
+  setRole(userId: number, newRole: 'USER' | 'SURVEYOR' | 'ADMIN') {
+    this.http.patch<User>(`${this.apiUrl}/${userId}/role`, { role: newRole }).subscribe({
       next: (updated) => {
         this.users.update(list => list.map(u => u.id === userId ? updated : u));
-        const label = updated.role === 'ADMIN' ? 'Administrator' : 'Użytkownik';
-        this.snackBar.open(`Rola zmieniona na: ${label}`, 'OK', { duration: 3000 });
+        this.snackBar.open(`Rola zmieniona na: ${this.roleLabel(updated.role)}`, 'OK', { duration: 3000 });
         this.cdr.detectChanges();
 
         const maxPage = Math.max(0, Math.ceil(this.processedUsers.length / this.pageSize) - 1);

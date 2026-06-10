@@ -7,14 +7,23 @@ import com.systemankiet.dto.UpdateSurveyStatusRequest;
 import com.systemankiet.entity.User;
 import com.systemankiet.service.SurveyService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/api/surveys")
 @RequiredArgsConstructor
@@ -22,13 +31,33 @@ public class SurveyController {
 
     private final SurveyService surveyService;
 
-    // Ankiety stworzone przez zalogowanego uzytkownika
+    // Ankiety stworzone przez zalogowanego uzytkownika z paginacja i filtrami po stronie backendu
     @GetMapping
-    public ResponseEntity<List<SurveyDto>> getUserSurveys(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(surveyService.getUserSurveys(user));
+    @PreAuthorize("hasAnyRole('SURVEYOR', 'ADMIN')")
+    public ResponseEntity<Page<SurveyDto>> getUserSurveys(
+            @AuthenticationPrincipal User user,
+            @RequestParam(defaultValue = "0")    @Min(0)               int page,
+            @RequestParam(defaultValue = "6")    @Min(1) @Max(100)     int size,
+            @RequestParam(defaultValue = "")     String search,
+            @RequestParam(defaultValue = "all")  String status,
+            @RequestParam(defaultValue = "all")  String type,
+            @RequestParam(defaultValue = "createdAt") String sort,
+            @RequestParam(defaultValue = "desc") String dir) {
+
+        // Mapowanie nazw pol z frontendu na pola encji
+        String sortField = switch (sort) {
+            case "title"      -> "title";
+            case "status"     -> "status";
+            case "accessType" -> "type";
+            default           -> "createdAt";
+        };
+        Sort.Direction direction = "asc".equalsIgnoreCase(dir) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
+
+        return ResponseEntity.ok(surveyService.getUserSurveys(user, search, status, type, pageable));
     }
 
-    // Ankiety wewnetrzne przypisane do uzytkownika (z jego organizacji, nie jego wlasne)
+    // Ankiety wewnetrzne przypisane do uzytkownika — dostępne dla wszystkich zalogowanych
     @GetMapping("/assigned")
     public ResponseEntity<List<SurveyDto>> getAssignedSurveys(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(surveyService.getAssignedSurveys(user));
@@ -40,8 +69,9 @@ public class SurveyController {
         return ResponseEntity.ok(surveyService.getPublicSurvey(id));
     }
 
-    // Tworzy nowa ankiete z pytaniami i opcjami (kaskadowo)
+    // Tworzy nowa ankiete — tylko SURVEYOR i ADMIN
     @PostMapping
+    @PreAuthorize("hasAnyRole('SURVEYOR', 'ADMIN')")
     public ResponseEntity<SurveyDto> createSurvey(
             @Valid @RequestBody CreateSurveyRequest request,
             @AuthenticationPrincipal User user) {
@@ -49,8 +79,9 @@ public class SurveyController {
                 .body(surveyService.createSurvey(request, user));
     }
 
-    // Aktualizuje tresc ankiety i pytania (uzywane przez kreator)
+    // Aktualizuje tresc ankiety — tylko SURVEYOR i ADMIN
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SURVEYOR', 'ADMIN')")
     public ResponseEntity<SurveyDto> updateSurvey(
             @PathVariable Long id,
             @Valid @RequestBody CreateSurveyRequest request,
@@ -58,8 +89,9 @@ public class SurveyController {
         return ResponseEntity.ok(surveyService.updateSurvey(id, request, user));
     }
 
-    // Zmienia status ankiety (draft/active/closed)
+    // Zmienia status ankiety — tylko SURVEYOR i ADMIN
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('SURVEYOR', 'ADMIN')")
     public ResponseEntity<SurveyDto> updateSurveyStatus(
             @PathVariable Long id,
             @Valid @RequestBody UpdateSurveyStatusRequest request,
@@ -67,8 +99,9 @@ public class SurveyController {
         return ResponseEntity.ok(surveyService.updateSurveyStatus(id, request, user));
     }
 
-    // Usuwa ankiete (tylko wlasna)
+    // Usuwa ankiete — tylko SURVEYOR i ADMIN
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SURVEYOR', 'ADMIN')")
     public ResponseEntity<Void> deleteSurvey(
             @PathVariable Long id,
             @AuthenticationPrincipal User user) {

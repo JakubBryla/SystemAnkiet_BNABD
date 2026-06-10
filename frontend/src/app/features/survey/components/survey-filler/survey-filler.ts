@@ -65,7 +65,7 @@ export class SurveyFiller implements OnInit {
   private surveyId!: string;
 
   survey: Survey | null = null;
-  viewState: 'loading' | 'active' | 'closed' | 'draft' | 'not-found' | 'submitted' | 'login-required' | 'access-denied' = 'loading';
+  viewState: 'loading' | 'active' | 'closed' | 'draft' | 'not-found' | 'submitted' | 'login-required' | 'access-denied' | 'already-submitted' = 'loading';
   accessDeniedDomain: string | null = null;
   errorMessage: string | null = null;
 
@@ -119,6 +119,13 @@ export class SurveyFiller implements OnInit {
               this.cdr.detectChanges();
               return;
             }
+          }
+
+          // Sprawdź czy ankieta była już wypełniona (localStorage — dotyczy obu typów)
+          if (localStorage.getItem(`survey_submitted_${this.surveyId}`)) {
+            this.viewState = 'already-submitted';
+            this.cdr.detectChanges();
+            return;
           }
 
           this.viewState = this.survey.status;
@@ -203,12 +210,20 @@ export class SurveyFiller implements OnInit {
     this.http.post<any>(`${this.apiUrl}/${this.surveyId}/responses`, { answers }).subscribe({
       next: () => {
         this.errorMessage = null;
+        // Zapisz do localStorage żeby zapobiec ponownemu wypełnieniu
+        localStorage.setItem(`survey_submitted_${this.surveyId}`, '1');
         this.viewState = 'submitted';
         this.cdr.detectChanges();
       },
       error: (err) => {
+        if (err.status === 409) {
+          // Ankieta już wypełniona (backend potwierdził dla INTERNAL)
+          localStorage.setItem(`survey_submitted_${this.surveyId}`, '1');
+          this.viewState = 'already-submitted';
+          this.cdr.detectChanges();
+          return;
+        }
         const msg = err.error?.error || 'Błąd podczas wysyłania odpowiedzi.';
-        // Pytanie BLOCK — pokazujemy komunikat, nie zamykamy formularza
         this.errorMessage = msg;
         console.error('Błąd wysyłania odpowiedzi:', err);
       }
