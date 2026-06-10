@@ -1,0 +1,50 @@
+.not-found-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 60vh;
+  padding: 0 24px;
+}
+
+.error-icon {
+  font-size: 100px;
+  height: 100px;
+  width: 100px;
+  color: var(--mat-sys-primary);
+  margin-bottom: 24px;
+  opacity: 0.9;
+}
+
+.error-text {
+  margin-bottom: 32px;
+
+  h1 {
+    font-size: 6rem;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1;
+    color: var(--mat-sys-on-surface);
+  }
+
+  h2 {
+    font-size: 2rem;
+    margin: 16px 0;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  p {
+    font-size: 1.1rem;
+    color: var(--mat-sys-on-surface-variant);
+    max-width: 500px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+}
+
+.home-btn {
+  padding: 24px 32px;
+  font-size: 1.1rem;
+  border-radius: 30px;
+}

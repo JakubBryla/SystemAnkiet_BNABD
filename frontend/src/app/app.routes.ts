@@ -9,6 +9,7 @@ import { RespondentDashboard } from './features/dashboard/components/respondent-
 import { SurveyResults } from './features/survey/components/survey-results/survey-results';
 import { AdminPanel } from './features/admin/components/admin-panel/admin-panel';
 import { adminGuard } from './features/auth/guards/admin-guard';
+import { NotFound } from './core/components/not-found/not-found';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -41,5 +42,9 @@ export const routes: Routes = [
     component: AdminPanel,
     canActivate: [authGuard, adminGuard] 
   },
+  { 
+    path: '**', 
+    component: NotFound 
+  }
   
 ];
