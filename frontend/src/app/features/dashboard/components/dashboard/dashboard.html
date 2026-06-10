@@ -52,7 +52,7 @@
   </div>
 
   <div class="cards-grid">
-    @for (survey of surveys; track survey.id) {
+    @for (survey of paginatedSurveys; track survey.id) {
       <mat-card class="survey-card">
         
         <mat-card-header class="card-header-with-menu">
@@ -128,9 +128,9 @@
     }
   </div>
 
-  @if (totalSurveys > 0) {
+  @if (allSurveys.length > 0) {
     <mat-paginator
-      [length]="totalSurveys"
+      [length]="allSurveys.length"
       [pageSize]="pageSize"
       [pageIndex]="pageIndex"
       [pageSizeOptions]="[3, 6, 12, 24]"

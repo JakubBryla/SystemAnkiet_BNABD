@@ -68,10 +68,14 @@ export class Dashboard implements OnInit {
 
   private apiUrl = 'http://localhost:8080/api/surveys';
 
-  // Bieżąca strona ankiet (treść z Page<SurveyDto> zwracanego przez backend)
-  surveys: SurveySummary[] = [];
-  // Łączna liczba wyników — potrzebna do paginatora (page.totalElements)
-  totalSurveys = 0;
+  // Wszystkie ankiety załadowane z backendu (po filtrach/sortowaniu po stronie serwera)
+  allSurveys: SurveySummary[] = [];
+
+  // Getter zwraca tylko wycinek tablicy odpowiadający bieżącej stronie
+  get paginatedSurveys(): SurveySummary[] {
+    const start = this.pageIndex * this.pageSize;
+    return this.allSurveys.slice(start, start + this.pageSize);
+  }
 
   assignedSurveys: SurveySummary[] = [];
 
@@ -99,15 +103,16 @@ export class Dashboard implements OnInit {
     this.loadAssignedSurveys();
   }
 
-  // Wysyła bieżące filtry i parametry strony do backendu
-  // Backend zwraca Spring Page<SurveyDto>: { content: [...], totalElements: N, ... }
+  // Pobiera WSZYSTKIE ankiety pasujące do filtrów (size=1000 — paginacja odbywa się po stronie frontendu).
+  // Backend nadal obsługuje filtrowanie i sortowanie; frontend tnie wyniki na strony przez paginatedSurveys.
+  // Dzięki temu nawigacja między stronami nie wymaga kolejnych zapytań HTTP.
   private reloadSurveys() {
     if (!this.isAnkieterOrAdmin) return;
 
     this.http.get<PageResponse<any>>(this.apiUrl, {
       params: {
-        page: this.pageIndex,
-        size: this.pageSize,
+        page: 0,
+        size: 1000,
         search: this.searchQuery,
         status: this.filterStatus,
         type: this.filterAccessType,
@@ -116,8 +121,7 @@ export class Dashboard implements OnInit {
       }
     }).subscribe({
       next: (pageResult) => {
-        this.surveys = pageResult.content.map(s => this.mapToSummary(s));
-        this.totalSurveys = pageResult.totalElements;
+        this.allSurveys = pageResult.content.map(s => this.mapToSummary(s));
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Błąd ładowania ankiet:', err)
@@ -216,9 +220,11 @@ export class Dashboard implements OnInit {
     }).catch(err => console.error('Błąd podczas kopiowania linku:', err));
   }
 
+  // Zmiana strony/rozmiaru strony — tylko aktualizuje stan lokalny,
+  // nie wysyła nowego zapytania HTTP (paginacja odbywa się w paginatedSurveys getter)
   onPageChange(event: PageEvent) {
     this.pageIndex = event.pageIndex;
     this.pageSize = event.pageSize;
-    this.reloadSurveys();
+    this.cdr.detectChanges();
   }
 }

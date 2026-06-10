@@ -12,6 +12,12 @@ import java.util.Collection;
 import java.util.List;
 
 
+/**
+ * Encja użytkownika — tabela "users".
+ * Implementuje UserDetails, dzięki czemu Spring Security używa jej bezpośrednio do autoryzacji.
+ * Pole active kontroluje blokadę konta: isAccountNonLocked() zwraca active.
+ * Domena jest wyciągana z emaila przy rejestracji i służy do grupowania użytkowników w organizacje.
+ */
 @Entity
 @Table(name = "users")
 @Getter

@@ -9,6 +9,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Encja ankiety — tabela "surveys".
+ * Ankieta może być INTERNAL (tylko pracownicy tej samej domeny) lub EXTERNAL (publiczna przez link).
+ * lastActivatedAt jest aktualizowane przy każdym przejściu na status ACTIVE — używane do wyznaczania
+ * bieżącego okresu aktywności i umożliwia ponowne wypełnienie po zamknięciu i wznowieniu ankiety.
+ */
 @Entity
 @Table(name = "surveys")
 @Getter
@@ -38,6 +44,13 @@ public class Survey {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    // Aktualizowana przy każdym przejściu w status ACTIVE.
+    // Służy do określenia "bieżącego okresu aktywności" — duplikaty sprawdzane są
+    // tylko wśród odpowiedzi złożonych po tej dacie, co pozwala na ponowne
+    // wypełnienie ankiety po jej zamknięciu i ponownym otwarciu.
+    @Column(name = "last_activated_at")
+    private LocalDateTime lastActivatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)

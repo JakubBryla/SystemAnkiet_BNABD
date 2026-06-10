@@ -16,6 +16,11 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
+/**
+ * Kontroler zarządzania użytkownikami — dostępny wyłącznie dla roli ADMIN.
+ * GET /api/users — lista wszystkich użytkowników.
+ * PATCH /api/users/{id}/role — zmiana roli użytkownika (admin nie może zmienić własnej roli).
+ */
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor

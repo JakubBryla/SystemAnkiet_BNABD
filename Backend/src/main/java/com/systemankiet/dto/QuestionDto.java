@@ -8,6 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * DTO pytania — używane w dwóch kierunkach:
+ * - z backendu do frontendu jako część SurveyDetailDto (dla wypełniającego i edytującego),
+ * - z frontendu do backendu jako część CreateSurveyRequest (przy tworzeniu/edycji ankiety).
+ * Opcje przechowywane jako lista stringów (nie jako obiekty AnswerOption).
+ */
 @Data
 public class QuestionDto {
 
@@ -17,7 +23,6 @@ public class QuestionDto {
     @NotBlank(message = "Typ pytania jest wymagany")
     private String type;
 
-    // Boolean (nie boolean) - Lombok generuje getIsRequired(), Jackson mapuje na klucz "isRequired"
     private Boolean isRequired;
 
     private List<String> options = new ArrayList<>();

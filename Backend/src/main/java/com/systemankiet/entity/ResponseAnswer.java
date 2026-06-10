@@ -3,6 +3,11 @@ package com.systemankiet.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+/**
+ * Encja odpowiedzi na jedno pytanie — tabela "response_answers".
+ * Powiązana z konkretnym wypełnieniem (SurveyResponse) i pytaniem (Question).
+ * answerValue przechowuje tekst odpowiedzi; dla multiple-choice wartości są oddzielone przecinkami.
+ */
 @Entity
 @Table(name = "response_answers")
 @Getter

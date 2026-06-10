@@ -5,6 +5,10 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * Krótkie potwierdzenie zapisu wypełnienia ankiety zwracane po POST /api/surveys/{id}/responses.
+ * Frontend używa go do wyświetlenia ekranu "dziękujemy" i informacji o ewentualnym flagowaniu.
+ */
 @Data
 public class ResponseDto {
 

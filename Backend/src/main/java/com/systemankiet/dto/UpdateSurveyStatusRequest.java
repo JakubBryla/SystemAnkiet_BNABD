@@ -4,6 +4,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
+/**
+ * Żądanie zmiany statusu ankiety (PATCH /api/surveys/{id}/status).
+ * Celowo oddzielone od CreateSurveyRequest — zmiana statusu to osobna operacja biznesowa.
+ * Dozwolone wartości: draft, active, closed.
+ */
 @Data
 public class UpdateSurveyStatusRequest {
 

@@ -3,6 +3,10 @@ package com.systemankiet.dto;
 import com.systemankiet.entity.User;
 import lombok.Data;
 
+/**
+ * Dane użytkownika zwracane w panelu admina (GET /api/users).
+ * Nie zawiera hasła — backend nigdy nie odsyła pola password do frontendu.
+ */
 @Data
 public class UserDto {
 

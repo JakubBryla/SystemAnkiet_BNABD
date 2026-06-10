@@ -7,6 +7,10 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Żądanie tworzenia lub edycji ankiety (POST /api/surveys i PUT /api/surveys/{id}).
+ * Zawiera pełną strukturę ankiety: tytuł, opis, typ i listę pytań z opcjami.
+ */
 @Data
 public class CreateSurveyRequest {
 

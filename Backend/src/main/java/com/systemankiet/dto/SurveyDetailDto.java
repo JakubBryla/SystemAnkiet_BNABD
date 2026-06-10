@@ -3,12 +3,15 @@ package com.systemankiet.dto;
 import com.systemankiet.entity.Survey;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Pelny widok ankiety zawierajacy pytania i opcje odpowiedzi.
- * Uzywany przez publiczny endpoint dla SurveyFiller (/api/surveys/{id}/public).
+ * Pełny widok ankiety zawierający pytania i opcje odpowiedzi.
+ * Zwracany przez GET /api/surveys/{id}/public — używany przez SurveyFiller (wypełnianie)
+ * oraz SurveyCreator (edycja). Zawiera lastActivatedAt potrzebne frontendowi
+ * do generowania klucza localStorage per-użytkownik per-okres-aktywności.
  */
 @Data
 public class SurveyDetailDto {
@@ -24,6 +27,9 @@ public class SurveyDetailDto {
     // Czy ankieta ma już zapisane odpowiedzi — pytania są wtedy zablokowane do edycji
     private boolean hasResponses;
     private long responseCount;
+    // Data ostatniej aktywacji — frontend używa jej jako części klucza localStorage
+    // żeby różni użytkownicy i różne okresy aktywności miały osobne wpisy
+    private LocalDateTime lastActivatedAt;
 
     public static SurveyDetailDto fromEntity(Survey survey) {
         SurveyDetailDto dto = new SurveyDetailDto();
@@ -38,6 +44,7 @@ public class SurveyDetailDto {
                 .map(QuestionDto::fromEntity)
                 .collect(Collectors.toList())
         );
+        dto.setLastActivatedAt(survey.getLastActivatedAt());
         return dto;
     }
 }

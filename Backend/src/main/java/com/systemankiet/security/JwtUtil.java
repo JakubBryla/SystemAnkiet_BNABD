@@ -10,6 +10,11 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.function.Function;
 
+/**
+ * Narzędzie do generowania i walidacji tokenów JWT (algorytm HS256).
+ * Sekret i czas wygasania pobierane z application.properties (jwt.secret, jwt.expiration).
+ * Token zawiera email użytkownika jako subject i wygasa po 24h (86400000ms).
+ */
 @Component
 public class JwtUtil {
 
@@ -23,6 +28,7 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
+    /** Generuje token JWT z emailem jako subject, ważny przez jwt.expiration ms. */
     public String generateToken(String email) {
         return Jwts.builder()
                 .subject(email)
@@ -36,6 +42,7 @@ public class JwtUtil {
         return extractClaim(token, Claims::getSubject);
     }
 
+    /** Sprawdza czy token należy do podanego emaila i nie wygasł. Zwraca false przy każdym wyjątku. */
     public boolean isTokenValid(String token, String email) {
         try {
             return extractEmail(token).equals(email) && !isTokenExpired(token);
