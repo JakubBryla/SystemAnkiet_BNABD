@@ -26,6 +26,11 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
+/**
+ * Serwis odpowiedzi — zapis wypełnień ankiet i pobieranie wyników dla ankietera.
+ * Przy zapisie: weryfikuje status ankiety, domenę użytkownika (INTERNAL), duplikaty per-okres-aktywności
+ * oraz automatycznie flaguje odpowiedzi z błędnymi odpowiedziami na pytania kontrolne.
+ */
 @Service
 @RequiredArgsConstructor
 public class ResponseService {

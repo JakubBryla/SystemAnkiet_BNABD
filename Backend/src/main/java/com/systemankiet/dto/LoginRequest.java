@@ -4,6 +4,10 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
+/**
+ * Żądanie logowania przesyłane przez frontend do POST /api/auth/login.
+ * Walidacja odbywa się przez adnotacje Bean Validation (@NotBlank, @Email).
+ */
 @Data
 public class LoginRequest {
 

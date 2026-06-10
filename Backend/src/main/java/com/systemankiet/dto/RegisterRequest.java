@@ -10,6 +10,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * Żądanie rejestracji przesyłane przez frontend do POST /api/auth/register.
+ * Hasło i confirmPassword wykluczone z toString/equals ze względów bezpieczeństwa.
+ * Backend wyciąga domenę z emaila automatycznie (AuthService) i przypisuje rolę USER.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

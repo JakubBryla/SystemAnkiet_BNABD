@@ -10,6 +10,11 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+/**
+ * Tworzy domyślne konta przy starcie aplikacji (jeśli jeszcze nie istnieją).
+ * admin@admin.com / admin123 → rola ADMIN
+ * ankieter@test.com / admin123 → rola SURVEYOR
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -34,7 +39,7 @@ public class DataInitializer implements ApplicationRunner {
         if (!userRepository.existsByEmailIgnoreCase("ankieter@test.com")) {
             User ankieter = User.builder()
                     .email("ankieter@test.com")
-                    .password(passwordEncoder.encode("ankieter123"))
+                    .password(passwordEncoder.encode("admin123"))
                     .role(Role.SURVEYOR)
                     .domain("test.com")
                     .build();

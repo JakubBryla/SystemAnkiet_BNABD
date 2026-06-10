@@ -6,7 +6,11 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 
 import static org.springframework.data.web.config.EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO;
 
-// VIA_DTO: Page<T> serializowany przez stabilne DTO zamiast wewnetrznego PageImpl
+/**
+ * Punkt wejścia aplikacji Spring Boot.
+ * VIA_DTO: Page<T> serializowany przez stabilne DTO zamiast wewnętrznego PageImpl —
+ * zapewnia spójną strukturę JSON paginacji niezależnie od wersji Spring Data.
+ */
 @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO)
 @SpringBootApplication
 public class SystemAnkietApplication {

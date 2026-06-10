@@ -8,6 +8,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Encja wypełnienia ankiety — tabela "survey_responses".
+ * Jedno wypełnienie = jeden rekord; respondent może być null dla ankiet EXTERNAL (anonimowe).
+ * Flagowanie (isFlagged, flagStatus, flagReason) ustawiane automatycznie w ResponseService
+ * gdy odpowiedź na pytanie kontrolne nie zgadza się z expectedValue.
+ */
 @Entity
 @Table(name = "survey_responses")
 @Getter

@@ -3,6 +3,10 @@ package com.systemankiet.dto;
 import com.systemankiet.entity.ResponseAnswer;
 import lombok.Data;
 
+/**
+ * Jedna para pytanie + odpowiedź użytkownika w widoku wyników ankietera.
+ * Element listy w ResponseDetailDto — reprezentuje odpowiedź na pojedyncze pytanie.
+ */
 @Data
 public class AnswerDetailDto {
 

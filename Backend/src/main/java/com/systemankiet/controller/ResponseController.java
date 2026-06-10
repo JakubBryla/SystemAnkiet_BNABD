@@ -14,6 +14,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Kontroler odpowiedzi na ankiety.
+ * GET /api/surveys/{id}/responses — lista wypełnień dla ankietera (wymaga SURVEYOR/ADMIN).
+ * POST /api/surveys/{id}/responses — wysyłanie wypełnienia (publiczne dla EXTERNAL, wymaga logowania dla INTERNAL).
+ */
 @RestController
 @RequestMapping("/api/surveys")
 @RequiredArgsConstructor

@@ -25,6 +25,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+/**
+ * Konfiguracja Spring Security: reguły dostępu, JWT, CORS, BCrypt.
+ * Endpointy publiczne: /api/auth/**, /api/surveys/*\/public, POST /api/surveys/*\/responses.
+ * Wszystkie pozostałe wymagają tokenu JWT. Sesje są stateless (SessionCreationPolicy.STATELESS).
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity

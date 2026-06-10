@@ -8,8 +8,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Pelny widok ankiety zawierajacy pytania i opcje odpowiedzi.
- * Uzywany przez publiczny endpoint dla SurveyFiller (/api/surveys/{id}/public).
+ * Pełny widok ankiety zawierający pytania i opcje odpowiedzi.
+ * Zwracany przez GET /api/surveys/{id}/public — używany przez SurveyFiller (wypełnianie)
+ * oraz SurveyCreator (edycja). Zawiera lastActivatedAt potrzebne frontendowi
+ * do generowania klucza localStorage per-użytkownik per-okres-aktywności.
  */
 @Data
 public class SurveyDetailDto {

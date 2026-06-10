@@ -17,6 +17,10 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+/**
+ * Globalny handler wyjątków — mapuje wyjątki domenowe i systemowe na odpowiedzi HTTP z JSON.
+ * Dzięki @RestControllerAdvice nie ma potrzeby obsługi wyjątków w każdym kontrolerze osobno.
+ */
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {

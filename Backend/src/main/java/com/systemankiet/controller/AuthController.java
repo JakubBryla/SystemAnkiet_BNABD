@@ -10,6 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Kontroler autoryzacji — rejestracja i logowanie.
+ * Endpointy publiczne (bez tokenu JWT): POST /api/auth/login, POST /api/auth/register.
+ */
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor

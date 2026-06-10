@@ -7,6 +7,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Pełne wypełnienie ankiety widoczne w panelu wyników ankietera (GET /api/surveys/{id}/responses).
+ * Zawiera metadane odpowiedzi (kto, kiedy, czy oflagowana) oraz listę odpowiedzi na każde pytanie.
+ */
 @Data
 public class ResponseDetailDto {
 

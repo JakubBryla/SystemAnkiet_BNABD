@@ -5,6 +5,11 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * Skrócony widok ankiety używany na listach (bez pytań i opcji).
+ * Zwracany przez GET /api/surveys (lista ankietera) i GET /api/surveys/assigned (lista respondenta).
+ * Nie zawiera pytań — ładowanie pełnej struktury na listę byłoby nieefektywne.
+ */
 @Data
 public class SurveyDto {
 

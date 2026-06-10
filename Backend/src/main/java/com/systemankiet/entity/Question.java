@@ -6,6 +6,12 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Encja pytania — tabela "questions".
+ * Typy pytań: short-answer (tekst), single-choice (jedna opcja), multiple-choice (wiele opcji).
+ * Pytanie kontrolne (isControlQuestion) służy do weryfikacji wiarygodności respondenta —
+ * jeśli odpowiedź nie zgadza się z expectedValue, całe wypełnienie jest oznaczane jako UNRELIABLE.
+ */
 @Entity
 @Table(name = "questions")
 @Getter

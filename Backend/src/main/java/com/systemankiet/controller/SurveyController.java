@@ -23,6 +23,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Kontroler ankiet — CRUD, zmiana statusu, listowanie z filtrami i paginacją.
+ * Endpointy publiczne: GET /api/surveys/{id}/public.
+ * Endpointy dla SURVEYOR/ADMIN: GET /api/surveys, POST, PUT, PATCH status, DELETE.
+ * Limit rozmiaru strony: max 1000 (paginacja frontendowa — frontend pobiera wszystko naraz).
+ */
 @Validated
 @RestController
 @RequestMapping("/api/surveys")

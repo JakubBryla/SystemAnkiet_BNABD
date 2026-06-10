@@ -7,6 +7,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+/**
+ * Implementacja UserDetailsService wymagana przez Spring Security.
+ * Ładuje użytkownika z bazy po emailu — używana przez DaoAuthenticationProvider przy logowaniu
+ * oraz przez JwtAuthenticationFilter przy weryfikacji tokenu na każdym żądaniu.
+ */
 @Service
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {

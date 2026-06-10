@@ -11,6 +11,10 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Repozytorium wypełnień ankiet. Zawiera metody do sprawdzania duplikatów per-okres-aktywności
+ * oraz ładowania odpowiedzi z JOIN FETCH (eliminacja problemu N+1).
+ */
 @Repository
 public interface SurveyResponseRepository extends JpaRepository<SurveyResponse, Long> {
 

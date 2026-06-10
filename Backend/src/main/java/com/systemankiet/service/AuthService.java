@@ -13,6 +13,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ * Serwis autoryzacji — logowanie i rejestracja użytkowników.
+ * Przy logowaniu deleguje weryfikację hasła do Spring Security (authenticationManager),
+ * następnie generuje i zwraca token JWT.
+ * Przy rejestracji wyciąga domenę z emaila (część po @) i przypisuje rolę USER.
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthService {

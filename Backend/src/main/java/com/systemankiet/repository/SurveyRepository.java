@@ -14,6 +14,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Repozytorium ankiet. Zawiera zapytania JPQL dla paginacji z filtrami (dashboard ankietera)
+ * oraz wyszukiwania ankiet wewnętrznych przypisanych do respondenta (my-surveys).
+ */
 @Repository
 public interface SurveyRepository extends JpaRepository<Survey, Long> {
 

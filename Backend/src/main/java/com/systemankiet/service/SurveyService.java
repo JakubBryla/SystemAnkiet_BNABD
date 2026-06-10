@@ -25,6 +25,10 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
+/**
+ * Serwis ankiet — logika biznesowa tworzenia, edycji, zmiany statusu i usuwania ankiet.
+ * Zawiera też pobieranie ankiet dla dashboardu (z filtrami i paginacją) oraz listy respondenta.
+ */
 @Service
 @RequiredArgsConstructor
 public class SurveyService {

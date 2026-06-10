@@ -15,6 +15,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * Filtr HTTP wykonywany raz na żądanie — wyciąga token JWT z nagłówka Authorization,
+ * weryfikuje go i ustawia autentykację w SecurityContextHolder.
+ * Żądania bez tokenu lub z nieprawidłowym tokenem są przepuszczane dalej bez autentykacji —
+ * endpointy wymagające logowania zwrócą wtedy 401 przez Spring Security.
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
