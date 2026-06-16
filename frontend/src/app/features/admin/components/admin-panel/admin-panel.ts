@@ -114,7 +114,9 @@ export class AdminPanel implements OnInit {
         };
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('Błąd ładowania statystyk:', err)
+      error: () => {
+        this.snackBar.open('Nie można załadować statystyk.', 'OK', { duration: 4000 });
+      }
     });
   }
 

@@ -27,10 +27,10 @@ public class EventLog {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "event_type", nullable = false)
+    @Column(name = "event_type", nullable = false, updatable = false)
     private EventType eventType;
 
-    @Column(name = "occurred_at", nullable = false)
+    @Column(name = "occurred_at", nullable = false, updatable = false)
     private LocalDateTime occurredAt;
 
     @PrePersist
