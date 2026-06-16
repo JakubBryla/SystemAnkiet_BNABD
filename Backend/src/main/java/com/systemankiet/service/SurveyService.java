@@ -6,11 +6,14 @@ import com.systemankiet.dto.SurveyDetailDto;
 import com.systemankiet.dto.SurveyDto;
 import com.systemankiet.dto.UpdateSurveyStatusRequest;
 import com.systemankiet.entity.AnswerOption;
+import com.systemankiet.entity.EventLog;
 import com.systemankiet.entity.Question;
 import com.systemankiet.entity.Survey;
 import com.systemankiet.entity.User;
+import com.systemankiet.enums.EventType;
 import com.systemankiet.enums.SurveyStatus;
 import com.systemankiet.enums.SurveyType;
+import com.systemankiet.repository.EventLogRepository;
 import com.systemankiet.repository.SurveyRepository;
 import com.systemankiet.repository.SurveyResponseRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +31,8 @@ import java.util.stream.Collectors;
 /**
  * Serwis ankiet — logika biznesowa tworzenia, edycji, zmiany statusu i usuwania ankiet.
  * Zawiera też pobieranie ankiet dla dashboardu (z filtrami i paginacją) oraz listy respondenta.
+ * Tworzenie ankiety loguje zdarzenie SURVEY_CREATED do event_log (podstawa statystyk panelu admina) —
+ * usunięcie ankiety (deleteSurvey) nie wpływa na ten log, więc statystyki historyczne się nie zmieniają.
  */
 @Service
 @RequiredArgsConstructor
@@ -35,6 +40,7 @@ public class SurveyService {
 
     private final SurveyRepository surveyRepository;
     private final SurveyResponseRepository responseRepository;
+    private final EventLogRepository eventLogRepository;
 
     // Paginacja po stronie backendu z filtrami przekazanymi jako parametry zapytania
     @Transactional(readOnly = true)
@@ -72,7 +78,14 @@ public class SurveyService {
         survey.setType(parseSurveyType(request.getType()));
         survey.setQuestions(buildQuestions(request.getQuestions(), survey));
 
-        return SurveyDto.fromEntity(surveyRepository.save(survey));
+        Survey saved = surveyRepository.save(survey);
+
+        eventLogRepository.save(EventLog.builder()
+                .eventType(EventType.SURVEY_CREATED)
+                .occurredAt(LocalDateTime.now())
+                .build());
+
+        return SurveyDto.fromEntity(saved);
     }
 
     @Transactional

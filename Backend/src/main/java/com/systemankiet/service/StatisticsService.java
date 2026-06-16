@@ -2,8 +2,8 @@ package com.systemankiet.service;
 
 import com.systemankiet.dto.AdminStatisticsDto;
 import com.systemankiet.dto.MonthlyStatDto;
-import com.systemankiet.repository.SurveyRepository;
-import com.systemankiet.repository.UserRepository;
+import com.systemankiet.enums.EventType;
+import com.systemankiet.repository.EventLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +18,8 @@ import java.util.stream.Collectors;
 /**
  * Serwis statystyk dla panelu admina.
  * Liczy nowych użytkowników i utworzone ankiety w podziale na miesiące
- * dla ostatnich 12 miesięcy (włącznie z bieżącym).
+ * dla ostatnich 12 miesięcy (włącznie z bieżącym), na podstawie append-only event_log —
+ * usunięcie użytkownika lub ankiety nie zmienia retroaktywnie wcześniej naliczonych statystyk.
  */
 @Service
 @RequiredArgsConstructor
@@ -26,8 +27,7 @@ public class StatisticsService {
 
     private static final int MONTHS_BACK = 12;
 
-    private final UserRepository userRepository;
-    private final SurveyRepository surveyRepository;
+    private final EventLogRepository eventLogRepository;
 
     @Transactional(readOnly = true)
     public AdminStatisticsDto getYearlyStatistics() {
@@ -35,8 +35,8 @@ public class StatisticsService {
         YearMonth startMonth = currentMonth.minusMonths(MONTHS_BACK - 1);
         LocalDateTime since = startMonth.atDay(1).atStartOfDay();
 
-        List<LocalDateTime> userDates = userRepository.findCreatedAtSince(since);
-        List<LocalDateTime> surveyDates = surveyRepository.findCreatedAtSince(since);
+        List<LocalDateTime> userDates = eventLogRepository.findOccurredAtSince(EventType.USER_REGISTERED, since);
+        List<LocalDateTime> surveyDates = eventLogRepository.findOccurredAtSince(EventType.SURVEY_CREATED, since);
 
         AdminStatisticsDto dto = new AdminStatisticsDto();
         dto.setUserStats(buildMonthlyStats(userDates, startMonth));

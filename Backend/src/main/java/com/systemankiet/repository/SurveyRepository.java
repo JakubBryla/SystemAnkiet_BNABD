@@ -11,7 +11,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,10 +24,6 @@ public interface SurveyRepository extends JpaRepository<Survey, Long> {
     List<Survey> findByCreatedByOrderByCreatedAtDesc(User user);
 
     Optional<Survey> findByIdAndCreatedBy(Long id, User user);
-
-    // Daty utworzenia ankiet od podanego momentu — używane przez StatisticsService do grupowania po miesiącach
-    @Query("SELECT s.createdAt FROM Survey s WHERE s.createdAt >= :since")
-    List<LocalDateTime> findCreatedAtSince(@Param("since") LocalDateTime since);
 
     // N+1 fix: laduje ankiete z pytaniami i opcjami w jednym zapytaniu SQL (dla SurveyFiller)
     @Query("SELECT DISTINCT s FROM Survey s " +
