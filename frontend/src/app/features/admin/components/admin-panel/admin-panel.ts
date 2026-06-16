@@ -25,6 +25,16 @@ export interface User {
   active: boolean;
 }
 
+export interface MonthlyStat {
+  label: string;
+  count: number;
+}
+
+export interface AdminStatistics {
+  userStats: MonthlyStat[];
+  surveyStats: MonthlyStat[];
+}
+
 @Component({
   selector: 'app-admin-panel',
   standalone: true,
@@ -52,6 +62,7 @@ export class AdminPanel implements OnInit {
   private cdr = inject(ChangeDetectorRef);
 
   private apiUrl = 'http://localhost:8080/api/users';
+  private statisticsUrl = 'http://localhost:8080/api/admin/statistics';
 
   users = signal<User[]>([]);
   isLoading = true;
@@ -66,7 +77,7 @@ export class AdminPanel implements OnInit {
   pageIndex = 0;
   pageSize = 5;
 
-  // mock data dla wykresów, w przyszłości można pobierać z API
+  // dane wykresów ładowane z GET /api/admin/statistics
   userStatsData: ChartData<'bar'> = { labels: [], datasets: [] };
   surveyStatsData: ChartData<'bar'> = { labels: [], datasets: [] };
 
@@ -81,44 +92,32 @@ export class AdminPanel implements OnInit {
 
   ngOnInit() {
     this.loadUsers();
-    this.loadMockStatistics();
+    this.loadStatistics();
   }
 
-  // przykładowe dane dla wykresów - w przyszłości można pobierać z API
-  private loadMockStatistics() {
-    const timeline = this.generateLast12Months();
-    const labels = timeline.map(t => t.label);
+  // Pobiera liczbę nowych użytkowników i utworzonych ankiet z ostatnich 12 miesięcy z backendu
+  private loadStatistics() {
+    this.http.get<AdminStatistics>(this.statisticsUrl).subscribe({
+      next: (stats) => {
+        this.userStatsData = {
+          labels: stats.userStats.map(s => s.label),
+          datasets: [
+            { data: stats.userStats.map(s => s.count), label: 'Nowi użytkownicy', backgroundColor: '#1a73e8' }
+          ]
+        };
 
-    // Sztywne przykładowe dane dla 12 słupków (od 11 miesięcy temu do dziś)
-    const mockUserCounts = [4, 7, 12, 9, 15, 22, 19, 25, 34, 28, 40, 48];
-    const mockSurveyCounts = [2, 5, 8, 4, 11, 14, 10, 18, 22, 17, 29, 35];
-
-    this.userStatsData = {
-      labels,
-      datasets: [
-        { data: mockUserCounts, label: 'Nowi użytkownicy', backgroundColor: '#1a73e8' }
-      ]
-    };
-
-    this.surveyStatsData = {
-      labels,
-      datasets: [
-        { data: mockSurveyCounts, label: 'Utworzone ankiety', backgroundColor: '#34a853' }
-      ]
-    };
-  }
-
-  private generateLast12Months(): { label: string }[] {
-    const months = [];
-    const now = new Date();
-    
-    for (let i = 11; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      months.push({
-        label: `${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`
-      });
-    }
-    return months;
+        this.surveyStatsData = {
+          labels: stats.surveyStats.map(s => s.label),
+          datasets: [
+            { data: stats.surveyStats.map(s => s.count), label: 'Utworzone ankiety', backgroundColor: '#34a853' }
+          ]
+        };
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.snackBar.open('Nie można załadować statystyk.', 'OK', { duration: 4000 });
+      }
+    });
   }
 
   private loadUsers() {

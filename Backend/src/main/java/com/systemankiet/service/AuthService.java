@@ -3,8 +3,11 @@ package com.systemankiet.service;
 import com.systemankiet.dto.AuthResponse;
 import com.systemankiet.dto.LoginRequest;
 import com.systemankiet.dto.RegisterRequest;
+import com.systemankiet.entity.EventLog;
 import com.systemankiet.entity.User;
+import com.systemankiet.enums.EventType;
 import com.systemankiet.enums.Role;
+import com.systemankiet.repository.EventLogRepository;
 import com.systemankiet.repository.UserRepository;
 import com.systemankiet.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -12,18 +15,23 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 /**
  * Serwis autoryzacji — logowanie i rejestracja użytkowników.
  * Przy logowaniu deleguje weryfikację hasła do Spring Security (authenticationManager),
  * następnie generuje i zwraca token JWT.
- * Przy rejestracji wyciąga domenę z emaila (część po @) i przypisuje rolę USER.
+ * Przy rejestracji wyciąga domenę z emaila (część po @), przypisuje rolę USER
+ * i loguje zdarzenie USER_REGISTERED do event_log (podstawa statystyk panelu admina).
  */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final EventLogRepository eventLogRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
@@ -40,6 +48,7 @@ public class AuthService {
         return new AuthResponse(token, user.getEmail(), user.getRole().name());
     }
 
+    @Transactional
     public void register(RegisterRequest request) {
         if (request.getConfirmPassword() != null
                 && !request.getPassword().equals(request.getConfirmPassword())) {
@@ -63,5 +72,10 @@ public class AuthService {
             .build();
 
         userRepository.save(user);
+
+        eventLogRepository.save(EventLog.builder()
+                .eventType(EventType.USER_REGISTERED)
+                .occurredAt(LocalDateTime.now())
+                .build());
     }
 }
