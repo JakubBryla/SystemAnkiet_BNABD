@@ -6,6 +6,36 @@
     </div>
   </div>
 
+  @if (userStatsData.datasets.length > 0 && surveyStatsData.datasets.length > 0) {
+    <div class="stats-grid">
+      <mat-card class="stat-card">
+        <mat-card-header>
+          <mat-card-title>Rejestracje użytkowników (ostatnie 12 m-cy)</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="chart-container">
+          <canvas baseChart
+            [data]="userStatsData"
+            [options]="chartOptions"
+            [type]="chartType">
+          </canvas>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-header>
+          <mat-card-title>Utworzone ankiety (ostatnie 12 m-cy)</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="chart-container">
+          <canvas baseChart
+            [data]="surveyStatsData"
+            [options]="chartOptions"
+            [type]="chartType">
+          </canvas>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+
   @if (isLoading) {
     <div style="display: flex; justify-content: center; padding: 48px;">
       <mat-spinner></mat-spinner>
