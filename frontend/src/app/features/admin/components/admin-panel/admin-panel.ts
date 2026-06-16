@@ -12,6 +12,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 
 export interface User {
   id: number;
@@ -38,7 +40,8 @@ export interface User {
     MatSelectModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    BaseChartDirective
   ],
   templateUrl: './admin-panel.html',
   styleUrl: './admin-panel.scss'
@@ -63,8 +66,59 @@ export class AdminPanel implements OnInit {
   pageIndex = 0;
   pageSize = 5;
 
+  // mock data dla wykresów, w przyszłości można pobierać z API
+  userStatsData: ChartData<'bar'> = { labels: [], datasets: [] };
+  surveyStatsData: ChartData<'bar'> = { labels: [], datasets: [] };
+
+  public chartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    scales: { 
+      y: { beginAtZero: true, ticks: { stepSize: 5 } } 
+    }
+  };
+  
+  public chartType: ChartType = 'bar';
+
   ngOnInit() {
     this.loadUsers();
+    this.loadMockStatistics();
+  }
+
+  // przykładowe dane dla wykresów - w przyszłości można pobierać z API
+  private loadMockStatistics() {
+    const timeline = this.generateLast12Months();
+    const labels = timeline.map(t => t.label);
+
+    // Sztywne przykładowe dane dla 12 słupków (od 11 miesięcy temu do dziś)
+    const mockUserCounts = [4, 7, 12, 9, 15, 22, 19, 25, 34, 28, 40, 48];
+    const mockSurveyCounts = [2, 5, 8, 4, 11, 14, 10, 18, 22, 17, 29, 35];
+
+    this.userStatsData = {
+      labels,
+      datasets: [
+        { data: mockUserCounts, label: 'Nowi użytkownicy', backgroundColor: '#1a73e8' }
+      ]
+    };
+
+    this.surveyStatsData = {
+      labels,
+      datasets: [
+        { data: mockSurveyCounts, label: 'Utworzone ankiety', backgroundColor: '#34a853' }
+      ]
+    };
+  }
+
+  private generateLast12Months(): { label: string }[] {
+    const months = [];
+    const now = new Date();
+    
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({
+        label: `${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`
+      });
+    }
+    return months;
   }
 
   private loadUsers() {

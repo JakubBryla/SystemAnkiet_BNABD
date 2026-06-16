@@ -124,3 +124,39 @@
   h3 { margin: 8px 0; color: var(--mat-sys-on-surface); }
   p { margin: 0; }
 }
+
+// Style dla panelu statystyk
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  background: var(--mat-sys-surface-container-lowest);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  
+  mat-card-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    padding: 16px 16px 0 16px;
+    color: var(--mat-sys-on-surface);
+  }
+}
+
+.chart-container {
+  padding: 16px;
+  height: 280px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
